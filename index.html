@@ -99,6 +99,10 @@
             background: #8d3540;
         }
 
+        .test {
+            background: #315a91;
+        }
+
         .stop {
             background: #6b1f27;
         }
@@ -146,7 +150,9 @@
 
     <div class="card security-status">
 
-        <strong>Security Core</strong>
+        <strong>
+            Security Core
+        </strong>
 
         <span
             id="securityStatus"
@@ -158,7 +164,7 @@
     </div>
 
 
-    <!-- REQUEST -->
+    <!-- PROTECTED ACTION REQUEST -->
 
     <div class="card">
 
@@ -234,6 +240,14 @@
             DENY
         </button>
 
+
+        <button
+            id="testActionButton"
+            class="test"
+        >
+            TEST PROTECTED ACTION
+        </button>
+
     </div>
 
 
@@ -294,30 +308,36 @@
     from "./js/security/PermissionManager.js";
 
 
+    import {
+        ActionGuard
+    }
+    from "./js/security/ActionGuard.js";
+
+
     /*
     ====================================================
-    RAIVEN SECURITY CORE v0.2
+    RAIVEN SECURITY CORE
     ====================================================
 
-    Core rule:
+    A3 ACTION GUARD
 
-    NO PROTECTED ACTION MAY EXECUTE
-    WITHOUT PASSING THROUGH SECURITY CORE.
+    Protected actions must pass through:
 
-    Permission management is handled by
-    PermissionManager.
-
-    The UI does NOT directly modify permissions.
+    Security Core
+          ↓
+    Permission Manager
+          ↓
+    Action Guard
+          ↓
+    Authorization
+          ↓
+    Execution
+          ↓
+    Permission Consumption
+          ↓
+    Logging
     ====================================================
     */
-
-
-    // --------------------------------------------------
-    // PERMISSION MANAGER
-    // --------------------------------------------------
-
-    const permissionManager =
-        new PermissionManager();
 
 
     // --------------------------------------------------
@@ -333,23 +353,6 @@
         logs: []
 
     };
-
-
-    // --------------------------------------------------
-    // DOM REFERENCES
-    // --------------------------------------------------
-
-    const securityStatus =
-        document.getElementById("securityStatus");
-
-    const allowButton =
-        document.getElementById("allowButton");
-
-    const denyButton =
-        document.getElementById("denyButton");
-
-    const stopButton =
-        document.getElementById("stopButton");
 
 
     // --------------------------------------------------
@@ -382,7 +385,9 @@
             document.getElementById("log");
 
 
-        if (SecurityState.logs.length === 0) {
+        if (
+            SecurityState.logs.length === 0
+        ) {
 
             logElement.textContent =
                 "No security events yet.";
@@ -426,16 +431,57 @@
 
 
     // --------------------------------------------------
-    // PERMISSION CHECK
+    // PERMISSION MANAGER
     // --------------------------------------------------
 
-    function hasPermission(permission) {
+    const permissionManager =
+        new PermissionManager();
 
-        return permissionManager.check(
-            permission
+
+    // --------------------------------------------------
+    // ACTION GUARD
+    // --------------------------------------------------
+
+    const actionGuard =
+        new ActionGuard(
+            permissionManager,
+            SecurityState,
+            securityLog
         );
 
-    }
+
+    // --------------------------------------------------
+    // DOM REFERENCES
+    // --------------------------------------------------
+
+    const securityStatus =
+        document.getElementById(
+            "securityStatus"
+        );
+
+
+    const allowButton =
+        document.getElementById(
+            "allowButton"
+        );
+
+
+    const denyButton =
+        document.getElementById(
+            "denyButton"
+        );
+
+
+    const testActionButton =
+        document.getElementById(
+            "testActionButton"
+        );
+
+
+    const stopButton =
+        document.getElementById(
+            "stopButton"
+        );
 
 
     // --------------------------------------------------
@@ -461,7 +507,7 @@
 
 
             securityLog(
-                "CAMERA blocked by Emergency STOP."
+                "CAMERA request blocked by Emergency STOP."
             );
 
 
@@ -482,7 +528,7 @@
 
 
             securityLog(
-                "CAMERA blocked because Security Core is inactive."
+                "CAMERA request blocked because Security Core is inactive."
             );
 
 
@@ -491,7 +537,7 @@
         }
 
 
-        // Create permission request.
+        // Create request.
 
         const request =
             permissionManager.request(
@@ -510,10 +556,12 @@
         USER APPROVAL
         ------------------------------------------------
 
-        Only this Security Core function is allowed
-        to authorize the request.
+        This button represents the user's explicit
+        approval of the permission request.
 
-        The UI itself never modifies permission state.
+        The UI does not directly modify a permission
+        object. It asks the Permission Manager to
+        create the approved permission record.
         ------------------------------------------------
         */
 
@@ -559,69 +607,86 @@
 
 
     // --------------------------------------------------
-    // ACTION GUARD
+    // TEST PROTECTED ACTION
     // --------------------------------------------------
 
-    function ActionGuard(
-        permission,
-        action
-    ) {
-
-
-        // Emergency STOP always wins.
-
-        if (
-            SecurityState.emergencyStopped
-        ) {
-
-            securityLog(
-                `ACTION BLOCKED: ${action} — Emergency STOP`
-            );
-
-
-            return false;
-
-        }
-
-
-        // Security Core must be active.
-
-        if (
-            !SecurityState.active
-        ) {
-
-            securityLog(
-                `ACTION BLOCKED: ${action} — Security Core inactive`
-            );
-
-
-            return false;
-
-        }
-
-
-        // Permission must exist.
-
-        if (
-            !hasPermission(permission)
-        ) {
-
-            securityLog(
-                `ACTION BLOCKED: ${action} — Permission missing`
-            );
-
-
-            return false;
-
-        }
-
+    function testProtectedAction() {
 
         securityLog(
-            `ACTION AUTHORIZED: ${action}`
+            "Protected action requested: CAMERA_ACCESS_TEST"
         );
 
 
-        return true;
+        const result =
+            actionGuard.execute(
+
+                "CAMERA",
+
+                "CAMERA_ACCESS_TEST",
+
+                () => {
+
+                    /*
+                    ------------------------------------
+                    SIMULATED ACTION
+
+                    This does NOT access the real camera.
+
+                    We are testing the security pipeline
+                    before connecting real capabilities.
+                    ------------------------------------
+                    */
+
+                    return "SIMULATED_CAMERA_ACCESS";
+
+                }
+
+            );
+
+
+        // ------------------------------------------------
+        // ACTION BLOCKED
+        // ------------------------------------------------
+
+        if (
+            !result.allowed
+        ) {
+
+            showResult(
+                `ACTION BLOCKED: ${result.reason}`
+            );
+
+
+            return;
+
+        }
+
+
+        // ------------------------------------------------
+        // ACTION EXECUTED
+        // ------------------------------------------------
+
+        if (
+            result.executed
+        ) {
+
+            showResult(
+                "PROTECTED ACTION EXECUTED AND PERMISSION CONSUMED."
+            );
+
+
+            return;
+
+        }
+
+
+        // ------------------------------------------------
+        // EXECUTION FAILURE
+        // ------------------------------------------------
+
+        showResult(
+            `ACTION FAILED: ${result.reason}`
+        );
 
     }
 
@@ -637,8 +702,7 @@
 
 
         /*
-        Remove ALL permissions through
-        PermissionManager.
+        Remove every active permission.
         */
 
         permissionManager.clearAll();
@@ -680,6 +744,12 @@
     );
 
 
+    testActionButton.addEventListener(
+        "click",
+        testProtectedAction
+    );
+
+
     stopButton.addEventListener(
         "click",
         emergencyStop
@@ -697,6 +767,11 @@
 
     securityLog(
         "Permission Manager initialized."
+    );
+
+
+    securityLog(
+        "Action Guard initialized."
     );
 
 
