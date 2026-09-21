@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Raiven — Security Core</title>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
@@ -120,7 +122,9 @@
             color: #9ca8bb;
             white-space: pre-wrap;
         }
+
     </style>
+
 </head>
 
 <body>
@@ -128,16 +132,31 @@
 <div class="container">
 
     <header>
+
         <h1>RAIVEN</h1>
-        <div class="subtitle">Security Core v0.1</div>
+
+        <div class="subtitle">
+            Security Core v0.1
+        </div>
+
     </header>
+
 
     <!-- SECURITY STATUS -->
 
     <div class="card security-status">
+
         <strong>Security Core</strong>
-        <span id="securityStatus" class="active">ACTIVE</span>
+
+        <span
+            id="securityStatus"
+            class="active"
+        >
+            ACTIVE
+        </span>
+
     </div>
+
 
     <!-- REQUEST -->
 
@@ -147,60 +166,115 @@
             Protected Action Request
         </div>
 
-        <div class="row">
-            <span>Action</span>
-            <span class="value">Access Camera</span>
-        </div>
 
         <div class="row">
-            <span>Permission</span>
-            <span class="value">CAMERA</span>
+
+            <span>
+                Action
+            </span>
+
+            <span class="value">
+                Access Camera
+            </span>
+
         </div>
+
 
         <div class="row">
-            <span>Risk</span>
-            <span class="value">MEDIUM</span>
+
+            <span>
+                Permission
+            </span>
+
+            <span class="value">
+                CAMERA
+            </span>
+
         </div>
+
 
         <div class="row">
-            <span>Scope</span>
-            <span class="value">ONCE</span>
+
+            <span>
+                Risk
+            </span>
+
+            <span class="value">
+                MEDIUM
+            </span>
+
         </div>
 
-        <button class="allow" onclick="requestPermission()">
+
+        <div class="row">
+
+            <span>
+                Scope
+            </span>
+
+            <span class="value">
+                ONCE
+            </span>
+
+        </div>
+
+
+        <button
+            id="allowButton"
+            class="allow"
+        >
             ALLOW ONCE
         </button>
 
-        <button class="deny" onclick="denyPermission()">
+
+        <button
+            id="denyButton"
+            class="deny"
+        >
             DENY
         </button>
 
     </div>
 
+
     <!-- EMERGENCY STOP -->
 
     <div class="card">
 
-        <strong>Emergency Control</strong>
+        <strong>
+            Emergency Control
+        </strong>
 
-        <button class="stop" onclick="emergencyStop()">
+
+        <button
+            id="stopButton"
+            class="stop"
+        >
             EMERGENCY STOP
         </button>
 
     </div>
 
+
     <!-- RESULT -->
 
     <div id="result"></div>
+
 
     <!-- SECURITY LOG -->
 
     <div class="card">
 
-        <strong>Security Log</strong>
+        <strong>
+            Security Log
+        </strong>
 
-        <div id="log" class="log">
-No security events yet.
+
+        <div
+            id="log"
+            class="log"
+        >
+            No security events yet.
         </div>
 
     </div>
@@ -208,242 +282,423 @@ No security events yet.
 </div>
 
 
-<script>
+<!-- ==================================================
+     RAIVEN SECURITY CORE
+================================================== -->
 
-/*
-====================================================
-RAIVEN SECURITY CORE v0.1
-====================================================
+<script type="module">
 
-Core rule:
-
-NO PROTECTED ACTION MAY EXECUTE
-WITHOUT PASSING THROUGH SECURITY CORE.
-====================================================
-*/
+    import {
+        PermissionManager
+    }
+    from "./js/security/PermissionManager.js";
 
 
-// --------------------------------------------------
-// SECURITY STATE
-// --------------------------------------------------
+    /*
+    ====================================================
+    RAIVEN SECURITY CORE v0.2
+    ====================================================
 
-const SecurityState = {
+    Core rule:
 
-    active: true,
+    NO PROTECTED ACTION MAY EXECUTE
+    WITHOUT PASSING THROUGH SECURITY CORE.
 
-    emergencyStopped: false,
+    Permission management is handled by
+    PermissionManager.
 
-    permissions: {},
-
-    logs: []
-
-};
-
-
-// --------------------------------------------------
-// LOGGING
-// --------------------------------------------------
-
-function securityLog(event) {
-
-    const timestamp = new Date().toISOString();
-
-    SecurityState.logs.push({
-        time: timestamp,
-        event: event
-    });
-
-    updateLog();
-}
+    The UI does NOT directly modify permissions.
+    ====================================================
+    */
 
 
-function updateLog() {
+    // --------------------------------------------------
+    // PERMISSION MANAGER
+    // --------------------------------------------------
 
-    const logElement = document.getElementById("log");
+    const permissionManager =
+        new PermissionManager();
 
-    if (SecurityState.logs.length === 0) {
+
+    // --------------------------------------------------
+    // SECURITY STATE
+    // --------------------------------------------------
+
+    const SecurityState = {
+
+        active: true,
+
+        emergencyStopped: false,
+
+        logs: []
+
+    };
+
+
+    // --------------------------------------------------
+    // DOM REFERENCES
+    // --------------------------------------------------
+
+    const securityStatus =
+        document.getElementById("securityStatus");
+
+    const allowButton =
+        document.getElementById("allowButton");
+
+    const denyButton =
+        document.getElementById("denyButton");
+
+    const stopButton =
+        document.getElementById("stopButton");
+
+
+    // --------------------------------------------------
+    // LOGGING
+    // --------------------------------------------------
+
+    function securityLog(event) {
+
+        const timestamp =
+            new Date().toISOString();
+
+
+        SecurityState.logs.push({
+
+            time: timestamp,
+
+            event: event
+
+        });
+
+
+        updateLog();
+
+    }
+
+
+    function updateLog() {
+
+        const logElement =
+            document.getElementById("log");
+
+
+        if (SecurityState.logs.length === 0) {
+
+            logElement.textContent =
+                "No security events yet.";
+
+            return;
+
+        }
+
 
         logElement.textContent =
-            "No security events yet.";
 
-        return;
+            SecurityState.logs
+
+            .map(item =>
+                `[${item.time}] ${item.event}`
+            )
+
+            .join("\n");
+
     }
 
-    logElement.textContent =
-        SecurityState.logs
-        .map(item =>
-            `[${item.time}] ${item.event}`
-        )
-        .join("\n");
-}
+
+    // --------------------------------------------------
+    // RESULT DISPLAY
+    // --------------------------------------------------
+
+    function showResult(message) {
+
+        const result =
+            document.getElementById("result");
 
 
-// --------------------------------------------------
-// PERMISSION CHECK
-// --------------------------------------------------
-
-function hasPermission(permission) {
-
-    return SecurityState.permissions[permission] === true;
-}
+        result.style.display =
+            "block";
 
 
-// --------------------------------------------------
-// PERMISSION REQUEST
-// --------------------------------------------------
+        result.textContent =
+            message;
 
-function requestPermission() {
+    }
 
-    securityLog("Permission requested: CAMERA");
 
-    // Emergency STOP has highest priority.
-    if (SecurityState.emergencyStopped) {
+    // --------------------------------------------------
+    // PERMISSION CHECK
+    // --------------------------------------------------
+
+    function hasPermission(permission) {
+
+        return permissionManager.check(
+            permission
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // REQUEST PERMISSION
+    // --------------------------------------------------
+
+    function requestPermission() {
+
+        securityLog(
+            "Permission requested: CAMERA"
+        );
+
+
+        // Emergency STOP has highest priority.
+
+        if (
+            SecurityState.emergencyStopped
+        ) {
+
+            showResult(
+                "BLOCKED: Emergency STOP is active."
+            );
+
+
+            securityLog(
+                "CAMERA blocked by Emergency STOP."
+            );
+
+
+            return;
+
+        }
+
+
+        // Security Core must be active.
+
+        if (
+            !SecurityState.active
+        ) {
+
+            showResult(
+                "BLOCKED: Security Core is inactive."
+            );
+
+
+            securityLog(
+                "CAMERA blocked because Security Core is inactive."
+            );
+
+
+            return;
+
+        }
+
+
+        // Create permission request.
+
+        const request =
+            permissionManager.request(
+                "CAMERA",
+                "ONCE"
+            );
+
+
+        securityLog(
+            `Permission request created: ${request.permission} — ${request.scope}`
+        );
+
+
+        /*
+        ------------------------------------------------
+        USER APPROVAL
+        ------------------------------------------------
+
+        Only this Security Core function is allowed
+        to authorize the request.
+
+        The UI itself never modifies permission state.
+        ------------------------------------------------
+        */
+
+        permissionManager.grant(
+            "CAMERA",
+            "ONCE"
+        );
+
 
         showResult(
-            "BLOCKED: Emergency STOP is active."
+            "PERMISSION GRANTED: CAMERA — ONCE"
         );
+
 
         securityLog(
-            "CAMERA blocked by Emergency STOP."
+            "CAMERA permission granted by user."
         );
 
-        return;
     }
 
-    // Security Core must be active.
-    if (!SecurityState.active) {
+
+    // --------------------------------------------------
+    // DENY PERMISSION
+    // --------------------------------------------------
+
+    function denyPermission() {
+
+        permissionManager.deny(
+            "CAMERA"
+        );
+
 
         showResult(
-            "BLOCKED: Security Core is inactive."
+            "ACCESS BLOCKED: CAMERA permission denied."
         );
+
 
         securityLog(
-            "CAMERA blocked because Security Core is inactive."
+            "CAMERA permission denied by user."
         );
 
-        return;
     }
 
-    // User approval is required.
-    SecurityState.permissions["CAMERA"] = true;
 
-    showResult(
-        "PERMISSION GRANTED: CAMERA — ONCE"
-    );
+    // --------------------------------------------------
+    // ACTION GUARD
+    // --------------------------------------------------
 
-    securityLog(
-        "CAMERA permission granted by user."
-    );
-}
+    function ActionGuard(
+        permission,
+        action
+    ) {
 
 
-// --------------------------------------------------
-// DENY
-// --------------------------------------------------
+        // Emergency STOP always wins.
 
-function denyPermission() {
+        if (
+            SecurityState.emergencyStopped
+        ) {
 
-    SecurityState.permissions["CAMERA"] = false;
-
-    showResult(
-        "ACCESS BLOCKED: CAMERA permission denied."
-    );
-
-    securityLog(
-        "CAMERA permission denied by user."
-    );
-}
+            securityLog(
+                `ACTION BLOCKED: ${action} — Emergency STOP`
+            );
 
 
-// --------------------------------------------------
-// ACTION GUARD
-// --------------------------------------------------
+            return false;
 
-function ActionGuard(permission, action) {
+        }
 
-    // Emergency STOP always wins.
-    if (SecurityState.emergencyStopped) {
+
+        // Security Core must be active.
+
+        if (
+            !SecurityState.active
+        ) {
+
+            securityLog(
+                `ACTION BLOCKED: ${action} — Security Core inactive`
+            );
+
+
+            return false;
+
+        }
+
+
+        // Permission must exist.
+
+        if (
+            !hasPermission(permission)
+        ) {
+
+            securityLog(
+                `ACTION BLOCKED: ${action} — Permission missing`
+            );
+
+
+            return false;
+
+        }
+
 
         securityLog(
-            `ACTION BLOCKED: ${action} — Emergency STOP`
+            `ACTION AUTHORIZED: ${action}`
         );
 
-        return false;
+
+        return true;
+
     }
 
-    // Security Core must be active.
-    if (!SecurityState.active) {
+
+    // --------------------------------------------------
+    // EMERGENCY STOP
+    // --------------------------------------------------
+
+    function emergencyStop() {
+
+        SecurityState.emergencyStopped =
+            true;
+
+
+        /*
+        Remove ALL permissions through
+        PermissionManager.
+        */
+
+        permissionManager.clearAll();
+
+
+        securityStatus.textContent =
+            "EMERGENCY STOP";
+
+
+        securityStatus.className =
+            "";
+
+
+        showResult(
+            "ALL PROTECTED ACTIONS BLOCKED."
+        );
+
 
         securityLog(
-            `ACTION BLOCKED: ${action} — Security Core inactive`
+            "EMERGENCY STOP ACTIVATED."
         );
 
-        return false;
     }
 
-    // Permission must exist.
-    if (!hasPermission(permission)) {
 
-        securityLog(
-            `ACTION BLOCKED: ${action} — Permission missing`
-        );
+    // --------------------------------------------------
+    // BUTTON EVENTS
+    // --------------------------------------------------
 
-        return false;
-    }
+    allowButton.addEventListener(
+        "click",
+        requestPermission
+    );
+
+
+    denyButton.addEventListener(
+        "click",
+        denyPermission
+    );
+
+
+    stopButton.addEventListener(
+        "click",
+        emergencyStop
+    );
+
+
+    // --------------------------------------------------
+    // INITIALIZATION
+    // --------------------------------------------------
 
     securityLog(
-        `ACTION AUTHORIZED: ${action}`
+        "Security Core initialized."
     );
 
-    return true;
-}
-
-
-// --------------------------------------------------
-// EMERGENCY STOP
-// --------------------------------------------------
-
-function emergencyStop() {
-
-    SecurityState.emergencyStopped = true;
-
-    // Remove active permissions.
-    SecurityState.permissions = {};
-
-    document.getElementById(
-        "securityStatus"
-    ).textContent = "EMERGENCY STOP";
-
-    document.getElementById(
-        "securityStatus"
-    ).className = "";
-
-    showResult(
-        "ALL PROTECTED ACTIONS BLOCKED."
-    );
 
     securityLog(
-        "EMERGENCY STOP ACTIVATED."
+        "Permission Manager initialized."
     );
-}
 
-
-// --------------------------------------------------
-// RESULT DISPLAY
-// --------------------------------------------------
-
-function showResult(message) {
-
-    const result =
-        document.getElementById("result");
-
-    result.style.display = "block";
-
-    result.textContent = message;
-}
-
-
-securityLog("Security Core initialized.");
 
 </script>
 
