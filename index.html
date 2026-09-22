@@ -123,6 +123,10 @@
         background: #245f70;
     }
 
+    .consistencyTest {
+        background: #72552f;
+    }
+
     .stop {
         background: #6b1f27;
     }
@@ -188,7 +192,7 @@
     <h1>RAIVEN</h1>
 
     <div class="subtitle">
-        Security Core v0.1 — A4.4
+        Security Core v0.1 — A4.5
     </div>
 
 </header>
@@ -624,6 +628,105 @@
 
 
 <!-- ========================================= -->
+<!-- A4.5 RISK DECISION CONSISTENCY -->
+<!-- ========================================= -->
+
+<div class="card">
+
+    <div class="section-title">
+        A4.5 Risk Decision Consistency
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Requirement Validation
+        </span>
+
+        <span
+            id="requirementValidationStatus"
+            class="value"
+        >
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Monotonicity Check
+        </span>
+
+        <span
+            id="monotonicityStatus"
+            class="value"
+        >
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Fail-Closed Consistency
+        </span>
+
+        <span
+            id="failClosedConsistencyStatus"
+            class="value"
+        >
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <button
+        id="requirementValidationButton"
+        class="consistencyTest"
+    >
+        TEST REQUIREMENT VALIDATION
+    </button>
+
+
+    <button
+        id="monotonicityButton"
+        class="consistencyTest"
+    >
+        TEST RISK MONOTONICITY
+    </button>
+
+
+    <button
+        id="consistencyComparisonButton"
+        class="consistencyTest"
+    >
+        TEST REQUIREMENT COMPARISON
+    </button>
+
+
+    <button
+        id="a45FailClosedButton"
+        class="consistencyTest"
+    >
+        TEST A4.5 FAIL-CLOSED
+    </button>
+
+
+    <div
+        id="consistencyTestResult"
+        class="test-result"
+    ></div>
+
+</div>
+
+
+<!-- ========================================= -->
 <!-- EMERGENCY CONTROL -->
 <!-- ========================================= -->
 
@@ -700,6 +803,12 @@ const riskTestResult =
 
 const securityTestResult =
     document.getElementById("securityTestResult");
+
+
+const consistencyTestResult =
+    document.getElementById(
+        "consistencyTestResult"
+    );
 
 
 function log(message, status = null) {
@@ -1294,16 +1403,6 @@ document.getElementById(
         let allPassed = true;
 
 
-        /*
-         * LOW READ
-         *
-         * Score:
-         * 0
-         *
-         * Expected:
-         * LOW
-         */
-
         const lowRead = {
 
             name:
@@ -1338,19 +1437,6 @@ document.getElementById(
         };
 
 
-        /*
-         * MEDIUM WRITE
-         *
-         * IMPORTANT:
-         *
-         * userImpact MEDIUM = +1
-         * WRITE = +1
-         *
-         * Total = 2
-         *
-         * Score 2 = MEDIUM
-         */
-
         const mediumWrite = {
 
             name:
@@ -1384,16 +1470,6 @@ document.getElementById(
                 "SINGLE"
         };
 
-
-        /*
-         * HIGH CAPTURE
-         *
-         * Permission + PRIVATE
-         * + DEVICE + MEDIUM IMPACT
-         * + CAPTURE
-         *
-         * Expected HIGH
-         */
 
         const highCapture = {
 
@@ -1963,6 +2039,737 @@ document.getElementById(
 
 
 /* ========================================= */
+/* A4.5 — REQUIREMENT VALIDATION */
+/* ========================================= */
+
+document.getElementById(
+    "requirementValidationButton"
+).addEventListener(
+    "click",
+    () => {
+
+        consistencyTestResult.style.display =
+            "block";
+
+        consistencyTestResult.textContent =
+            "";
+
+        let allPassed = true;
+
+
+        const validRequirements = {
+
+            requiresConfirmation:
+                true,
+
+            requiresExplicitConfirmation:
+                true,
+
+            requiresAdditionalAuthentication:
+                true,
+
+            requiresAuditLog:
+                true,
+
+            requiresIsolation:
+                true,
+
+            requiresPreExecutionReview:
+                true,
+
+            requiresEmergencyProtection:
+                true
+        };
+
+
+        const invalidCases = [
+
+            {
+                name:
+                    "Explicit Without Confirmation",
+
+                requirements: {
+
+                    requiresConfirmation:
+                        false,
+
+                    requiresExplicitConfirmation:
+                        true,
+
+                    requiresAdditionalAuthentication:
+                        false,
+
+                    requiresAuditLog:
+                        true,
+
+                    requiresIsolation:
+                        false,
+
+                    requiresPreExecutionReview:
+                        false,
+
+                    requiresEmergencyProtection:
+                        false
+                },
+
+                expected:
+                    "EXPLICIT_CONFIRMATION_WITHOUT_CONFIRMATION"
+            },
+
+
+            {
+                name:
+                    "Authentication Without Confirmation",
+
+                requirements: {
+
+                    requiresConfirmation:
+                        false,
+
+                    requiresExplicitConfirmation:
+                        false,
+
+                    requiresAdditionalAuthentication:
+                        true,
+
+                    requiresAuditLog:
+                        true,
+
+                    requiresIsolation:
+                        false,
+
+                    requiresPreExecutionReview:
+                        false,
+
+                    requiresEmergencyProtection:
+                        false
+                },
+
+                expected:
+                    "AUTHENTICATION_WITHOUT_CONFIRMATION"
+            },
+
+
+            {
+                name:
+                    "Isolation Without Review",
+
+                requirements: {
+
+                    requiresConfirmation:
+                        true,
+
+                    requiresExplicitConfirmation:
+                        true,
+
+                    requiresAdditionalAuthentication:
+                        true,
+
+                    requiresAuditLog:
+                        true,
+
+                    requiresIsolation:
+                        true,
+
+                    requiresPreExecutionReview:
+                        false,
+
+                    requiresEmergencyProtection:
+                        true
+                },
+
+                expected:
+                    "ISOLATION_WITHOUT_PRE_EXECUTION_REVIEW"
+            },
+
+
+            {
+                name:
+                    "Emergency Protection Without Audit",
+
+                requirements: {
+
+                    requiresConfirmation:
+                        true,
+
+                    requiresExplicitConfirmation:
+                        true,
+
+                    requiresAdditionalAuthentication:
+                        false,
+
+                    requiresAuditLog:
+                        false,
+
+                    requiresIsolation:
+                        false,
+
+                    requiresPreExecutionReview:
+                        true,
+
+                    requiresEmergencyProtection:
+                        true
+                },
+
+                expected:
+                    "EMERGENCY_PROTECTION_WITHOUT_AUDIT_LOG"
+            }
+
+        ];
+
+
+        const validResult =
+            riskEngine.validateRequirementSet(
+                validRequirements
+            );
+
+
+        const validPassed =
+            validResult.valid === true;
+
+
+        if (!validPassed) {
+            allPassed = false;
+        }
+
+
+        const validLine =
+            "VALID REQUIREMENT SET: " +
+            (validPassed
+                ? "PASS"
+                : "FAIL");
+
+
+        log(
+            validLine,
+            validPassed
+        );
+
+
+        consistencyTestResult.textContent +=
+            validLine + "\n";
+
+
+        for (
+            const test of invalidCases
+        ) {
+
+            const result =
+                riskEngine.validateRequirementSet(
+                    test.requirements
+                );
+
+
+            const passed =
+
+                result.valid === false
+
+                &&
+
+                result.reason ===
+                test.expected;
+
+
+            if (!passed) {
+                allPassed = false;
+            }
+
+
+            const line =
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}\n` +
+
+                `Detected: ${
+                    result.reason
+                }`;
+
+
+            log(
+                line,
+                passed
+            );
+
+
+            consistencyTestResult.textContent +=
+                line + "\n";
+        }
+
+
+        consistencyTestResult.textContent +=
+            "\nFINAL RESULT: " +
+            (
+                allPassed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.5 — MONOTONICITY */
+/* ========================================= */
+
+document.getElementById(
+    "monotonicityButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const result =
+            riskEngine
+                .validateRequirementMonotonicity();
+
+
+        const passed =
+            result.valid === true;
+
+
+        log(
+            "Requirement Monotonicity: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        consistencyTestResult.style.display =
+            "block";
+
+        consistencyTestResult.textContent =
+
+            "RISK REQUIREMENT MONOTONICITY\n\n" +
+
+            "LOW → MEDIUM: CHECKED\n" +
+
+            "MEDIUM → HIGH: CHECKED\n" +
+
+            "HIGH → CRITICAL: CHECKED\n\n" +
+
+            "RESULT: " +
+
+            (
+                passed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+
+
+        if (
+            !passed
+        ) {
+
+            consistencyTestResult.textContent +=
+                "\n\nReason: " +
+                result.reason;
+        }
+    }
+);
+
+
+/* ========================================= */
+/* A4.5 — REQUIREMENT COMPARISON */
+/* ========================================= */
+
+document.getElementById(
+    "consistencyComparisonButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const low =
+            riskEngine.getRequirements(
+                "LOW",
+                {
+                    actionType:
+                        "READ",
+                    executionMode:
+                        "LOCAL",
+                    duration:
+                        "SINGLE",
+                    dataSensitivity:
+                        "PUBLIC",
+                    externalEffect:
+                        "NONE",
+                    reversibility:
+                        "REVERSIBLE",
+                    userImpact:
+                        "LOW",
+                    scope:
+                        "ONCE"
+                }
+            );
+
+
+        const medium =
+            riskEngine.getRequirements(
+                "MEDIUM",
+                {
+                    actionType:
+                        "READ",
+                    executionMode:
+                        "LOCAL",
+                    duration:
+                        "SINGLE",
+                    dataSensitivity:
+                        "PUBLIC",
+                    externalEffect:
+                        "NONE",
+                    reversibility:
+                        "REVERSIBLE",
+                    userImpact:
+                        "LOW",
+                    scope:
+                        "ONCE"
+                }
+            );
+
+
+        const high =
+            riskEngine.getRequirements(
+                "HIGH",
+                {
+                    actionType:
+                        "READ",
+                    executionMode:
+                        "LOCAL",
+                    duration:
+                        "SINGLE",
+                    dataSensitivity:
+                        "PUBLIC",
+                    externalEffect:
+                        "NONE",
+                    reversibility:
+                        "REVERSIBLE",
+                    userImpact:
+                        "LOW",
+                    scope:
+                        "ONCE"
+                }
+            );
+
+
+        const critical =
+            riskEngine.getRequirements(
+                "CRITICAL",
+                {
+                    actionType:
+                        "READ",
+                    executionMode:
+                        "LOCAL",
+                    duration:
+                        "SINGLE",
+                    dataSensitivity:
+                        "PUBLIC",
+                    externalEffect:
+                        "NONE",
+                    reversibility:
+                        "REVERSIBLE",
+                    userImpact:
+                        "LOW",
+                    scope:
+                        "ONCE"
+                }
+            );
+
+
+        const lowMedium =
+            riskEngine.compareRequirements(
+                low,
+                medium
+            );
+
+
+        const mediumHigh =
+            riskEngine.compareRequirements(
+                medium,
+                high
+            );
+
+
+        const highCritical =
+            riskEngine.compareRequirements(
+                high,
+                critical
+            );
+
+
+        const passed =
+
+            lowMedium.consistent === true
+
+            &&
+
+            mediumHigh.consistent === true
+
+            &&
+
+            highCritical.consistent === true;
+
+
+        log(
+            "Requirement Comparison: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        consistencyTestResult.style.display =
+            "block";
+
+        consistencyTestResult.textContent =
+
+            "REQUIREMENT COMPARISON\n\n" +
+
+            "LOW → MEDIUM: " +
+            (
+                lowMedium.consistent
+                    ? "PASS"
+                    : "FAIL"
+            ) +
+
+            "\nMEDIUM → HIGH: " +
+
+            (
+                mediumHigh.consistent
+                    ? "PASS"
+                    : "FAIL"
+            ) +
+
+            "\nHIGH → CRITICAL: " +
+
+            (
+                highCritical.consistent
+                    ? "PASS"
+                    : "FAIL"
+            ) +
+
+            "\n\nFINAL RESULT: " +
+
+            (
+                passed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.5 — FAIL CLOSED */
+/* ========================================= */
+
+document.getElementById(
+    "a45FailClosedButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const invalidActions = [
+
+            {
+                name:
+                    "MISSING ACTION",
+
+                action:
+                    null
+            },
+
+
+            {
+                name:
+                    "INVALID SENSITIVITY",
+
+                action: {
+
+                    name:
+                        "INVALID_SENSITIVITY",
+
+                    permission:
+                        "NONE",
+
+                    dataSensitivity:
+                        "INVALID",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "READ",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+                }
+            },
+
+
+            {
+                name:
+                    "INVALID ACTION TYPE",
+
+                action: {
+
+                    name:
+                        "INVALID_ACTION_TYPE",
+
+                    permission:
+                        "NONE",
+
+                    dataSensitivity:
+                        "PUBLIC",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "INVALID",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+                }
+            }
+
+        ];
+
+
+        let allPassed = true;
+
+
+        consistencyTestResult.style.display =
+            "block";
+
+        consistencyTestResult.textContent =
+            "";
+
+
+        for (
+            const test of invalidActions
+        ) {
+
+            const result =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const requirements =
+                result.requirements;
+
+
+            const passed =
+
+                result.allowed === false
+
+                &&
+
+                result.riskLevel ===
+                "CRITICAL"
+
+                &&
+
+                requirements
+                    .requiresConfirmation === true
+
+                &&
+
+                requirements
+                    .requiresExplicitConfirmation === true
+
+                &&
+
+                requirements
+                    .requiresAdditionalAuthentication === true
+
+                &&
+
+                requirements
+                    .requiresAuditLog === true
+
+                &&
+
+                requirements
+                    .requiresIsolation === true
+
+                &&
+
+                requirements
+                    .requiresPreExecutionReview === true
+
+                &&
+
+                requirements
+                    .requiresEmergencyProtection === true;
+
+
+            if (!passed) {
+                allPassed = false;
+            }
+
+
+            const line =
+
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}\n` +
+
+                `Risk: ${result.riskLevel}\n` +
+
+                `Allowed: ${result.allowed}\n`;
+
+
+            log(
+                line,
+                passed
+            );
+
+
+            consistencyTestResult.textContent +=
+                line + "\n";
+        }
+
+
+        consistencyTestResult.textContent +=
+            "\nFINAL RESULT: " +
+            (
+                allPassed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
 /* PROTECTED ACTION */
 /* ========================================= */
 
@@ -2045,7 +2852,7 @@ document.getElementById(
 /* ========================================= */
 
 log(
-    "RAIVEN Risk Engine v0.4 initialized."
+    "RAIVEN Risk Engine v0.5 initialized."
 );
 
 evaluateCameraRisk();
