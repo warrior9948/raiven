@@ -2,1161 +2,2055 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>RAIVEN Security Core — A4.4</title>
+<meta charset="UTF-8">
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #05070b;
-            color: #e8eefc;
-            padding: 20px;
-        }
+<title>RAIVEN — Security Core</title>
 
-        h1 {
-            margin-bottom: 5px;
-        }
+<style>
 
-        .subtitle {
-            color: #8c98ad;
-            margin-bottom: 20px;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        .panel {
-            background: #0b1018;
-            border: 1px solid #202b3c;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 20px;
+        background: #080b12;
+        color: #edf2f7;
+        font-family: Arial, sans-serif;
+    }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #17202d;
-        }
+    .container {
+        width: 100%;
+        max-width: 520px;
+        margin: auto;
+    }
 
-        .row:last-child {
-            border-bottom: none;
-        }
+    header {
+        margin-bottom: 20px;
+    }
 
-        .label {
-            color: #9da9bc;
-        }
+    h1 {
+        margin: 0;
+        font-size: 30px;
+    }
 
-        .value {
-            font-weight: bold;
-        }
+    .subtitle {
+        color: #8994a8;
+        margin-top: 5px;
+    }
 
-        button {
-            width: 100%;
-            padding: 13px;
-            margin-top: 8px;
-            border: 1px solid #2b3b55;
-            border-radius: 8px;
-            background: #111a28;
-            color: #e8eefc;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .card {
+        background: #111722;
+        border: 1px solid #273044;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 15px;
+    }
 
-        button:hover {
-            background: #182438;
-        }
+    .security-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-        #log {
-            background: #020407;
-            border: 1px solid #182131;
-            border-radius: 8px;
-            padding: 12px;
-            min-height: 180px;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: monospace;
-            font-size: 13px;
-        }
+    .active {
+        color: #52d68a;
+        font-weight: bold;
+    }
 
-        .pass {
-            color: #69e69b;
-        }
+    .request-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
 
-        .fail {
-            color: #ff7070;
-        }
-    </style>
+    .section-title {
+        font-size: 17px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 8px 0;
+        color: #aeb8c9;
+    }
+
+    .value {
+        color: #edf2f7;
+        text-align: right;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .allow {
+        background: #287a4c;
+    }
+
+    .deny {
+        background: #8d3540;
+    }
+
+    .test {
+        background: #315a91;
+    }
+
+    .riskTest {
+        background: #624b9b;
+    }
+
+    .securityTest {
+        background: #245f70;
+    }
+
+    .stop {
+        background: #6b1f27;
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    #result {
+        display: none;
+        padding: 14px;
+        border-radius: 10px;
+        background: #0b1019;
+        margin-top: 15px;
+        line-height: 1.5;
+    }
+
+    .log {
+        font-family: monospace;
+        font-size: 13px;
+        color: #9ca8bb;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .test-result {
+        display: none;
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #0b1019;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+
+    .pass {
+        color: #52d68a;
+    }
+
+    .fail {
+        color: #ff6573;
+    }
+
+</style>
+
 </head>
+
 
 <body>
 
-    <h1>RAIVEN Security Core</h1>
+<div class="container">
+
+
+<!-- ========================================= -->
+<!-- HEADER -->
+<!-- ========================================= -->
+
+<header>
+
+    <h1>RAIVEN</h1>
 
     <div class="subtitle">
         Security Core v0.1 — A4.4
     </div>
 
-    <div class="panel">
+</header>
 
-        <h2>Risk Evaluation</h2>
 
-        <div class="row">
-            <span class="label">Action</span>
-            <span class="value" id="action">—</span>
-        </div>
+<!-- ========================================= -->
+<!-- SECURITY STATUS -->
+<!-- ========================================= -->
 
-        <div class="row">
-            <span class="label">Risk Score</span>
-            <span class="value" id="riskScore">—</span>
-        </div>
+<div class="card security-status">
 
-        <div class="row">
-            <span class="label">Base Risk</span>
-            <span class="value" id="baseRisk">—</span>
-        </div>
+    <strong>
+        Security Core
+    </strong>
 
-        <div class="row">
-            <span class="label">Final Risk</span>
-            <span class="value" id="riskLevel">—</span>
-        </div>
+    <span
+        id="securityStatus"
+        class="active"
+    >
+        ACTIVE
+    </span>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- PROTECTED ACTION -->
+<!-- ========================================= -->
+
+<div class="card">
+
+    <div class="request-title">
+        Protected Action Request
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Action
+        </span>
+
+        <span class="value">
+            Access Camera
+        </span>
 
     </div>
 
 
-    <div class="panel">
+    <div class="row">
 
-        <h2>Action Context</h2>
+        <span>
+            Permission
+        </span>
 
-        <div class="row">
-            <span class="label">Action Type</span>
-            <span class="value" id="actionType">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Execution Mode</span>
-            <span class="value" id="executionMode">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Duration</span>
-            <span class="value" id="duration">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Scope</span>
-            <span class="value" id="scope">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">External Effect</span>
-            <span class="value" id="externalEffect">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Data Sensitivity</span>
-            <span class="value" id="dataSensitivity">—</span>
-        </div>
+        <span class="value">
+            CAMERA
+        </span>
 
     </div>
 
 
-    <div class="panel">
+    <div class="row">
 
-        <h2>Security Requirements</h2>
+        <span>
+            Action Type
+        </span>
 
-        <div class="row">
-            <span class="label">Confirmation</span>
-            <span class="value" id="confirmation">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Explicit Confirmation</span>
-            <span class="value" id="explicitConfirmation">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Additional Authentication</span>
-            <span class="value" id="authentication">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Audit Log</span>
-            <span class="value" id="auditLog">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Isolation</span>
-            <span class="value" id="isolation">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Pre-Execution Review</span>
-            <span class="value" id="preExecutionReview">—</span>
-        </div>
-
-        <div class="row">
-            <span class="label">Emergency Protection</span>
-            <span class="value" id="emergencyProtection">—</span>
-        </div>
+        <span
+            id="actionType"
+            class="value"
+        >
+            —
+        </span>
 
     </div>
 
 
-    <div class="panel">
+    <div class="row">
 
-        <h2>A4.3 Tests</h2>
+        <span>
+            Execution
+        </span>
 
-        <button onclick="testRiskFloors()">
-            TEST RISK FLOORS
-        </button>
-
-        <button onclick="testActionContext()">
-            TEST ACTION CONTEXT
-        </button>
-
-        <button onclick="testInvalidContext()">
-            TEST INVALID CONTEXT
-        </button>
+        <span
+            id="executionMode"
+            class="value"
+        >
+            —
+        </span>
 
     </div>
 
 
-    <div class="panel">
+    <div class="row">
 
-        <h2>A4.4 Tests</h2>
+        <span>
+            Duration
+        </span>
 
-        <button onclick="testSecurityRequirements()">
-            TEST SECURITY REQUIREMENTS
-        </button>
-
-        <button onclick="testCriticalRequirements()">
-            TEST CRITICAL REQUIREMENTS
-        </button>
-
-        <button onclick="testContextEscalation()">
-            TEST CONTEXT ESCALATION
-        </button>
+        <span
+            id="duration"
+            class="value"
+        >
+            —
+        </span>
 
     </div>
 
 
-    <div class="panel">
+    <div class="row">
 
-        <h2>Security Log</h2>
+        <span>
+            Base Risk
+        </span>
 
-        <div id="log"></div>
+        <span
+            id="baseRiskLevel"
+            class="value"
+        >
+            NOT EVALUATED
+        </span>
 
     </div>
 
 
-    <script type="module">
+    <div class="row">
 
-        import { RiskEngine }
-            from "./js/security/RiskEngine.js";
+        <span>
+            Final Risk
+        </span>
 
+        <span
+            id="riskLevel"
+            class="value"
+        >
+            NOT EVALUATED
+        </span>
 
-        const engine =
-            new RiskEngine();
+    </div>
 
 
-        const logElement =
-            document.getElementById("log");
+    <div class="row">
 
+        <span>
+            Risk Score
+        </span>
 
-        function log(message, pass = null) {
+        <span
+            id="riskScore"
+            class="value"
+        >
+            —
+        </span>
 
-            const line =
-                document.createElement("div");
+    </div>
 
-            line.textContent =
-                message;
 
-            if (pass === true) {
-                line.className = "pass";
-            }
+    <div class="row">
 
-            if (pass === false) {
-                line.className = "fail";
-            }
+        <span>
+            Scope
+        </span>
 
-            logElement.appendChild(line);
+        <span class="value">
+            ONCE
+        </span>
 
-            logElement.scrollTop =
-                logElement.scrollHeight;
-        }
+    </div>
 
 
-        function clearLog() {
+    <button
+        id="allowButton"
+        class="allow"
+    >
+        ALLOW ONCE
+    </button>
 
-            logElement.innerHTML = "";
 
-        }
+    <button
+        id="denyButton"
+        class="deny"
+    >
+        DENY
+    </button>
 
 
-        function displayRisk(evaluation) {
+    <button
+        id="testActionButton"
+        class="test"
+    >
+        TEST PROTECTED ACTION
+    </button>
 
-            document.getElementById("action")
-                .textContent =
-                evaluation.action || "—";
+</div>
 
-            document.getElementById("riskScore")
-                .textContent =
-                evaluation.riskScore ?? "—";
 
-            document.getElementById("baseRisk")
-                .textContent =
-                evaluation.baseRiskLevel || "—";
+<!-- ========================================= -->
+<!-- A4.3 TEST PANEL -->
+<!-- ========================================= -->
 
-            document.getElementById("riskLevel")
-                .textContent =
-                evaluation.riskLevel || "—";
+<div class="card">
 
+    <div class="section-title">
+        A4.3 Risk Context Tests
+    </div>
 
-            const context =
-                evaluation.context || {};
 
+    <div class="row">
 
-            document.getElementById("actionType")
-                .textContent =
-                context.actionType || "—";
+        <span>
+            Context Validation
+        </span>
 
-            document.getElementById("executionMode")
-                .textContent =
-                context.executionMode || "—";
+        <span class="value">
+            ENABLED
+        </span>
 
-            document.getElementById("duration")
-                .textContent =
-                context.duration || "—";
+    </div>
 
-            document.getElementById("scope")
-                .textContent =
-                context.scope || "—";
 
-            document.getElementById("externalEffect")
-                .textContent =
-                context.externalEffect || "—";
+    <div class="row">
 
-            document.getElementById("dataSensitivity")
-                .textContent =
-                context.dataSensitivity || "—";
+        <span>
+            Risk Floors
+        </span>
 
+        <span class="value">
+            ENABLED
+        </span>
 
-            const requirements =
-                evaluation.requirements || {};
+    </div>
 
 
-            document.getElementById("confirmation")
-                .textContent =
-                requirements.requiresConfirmation
-                    ?? "—";
+    <div class="row">
 
-            document.getElementById("explicitConfirmation")
-                .textContent =
-                requirements.requiresExplicitConfirmation
-                    ?? "—";
+        <span>
+            Fail Closed
+        </span>
 
-            document.getElementById("authentication")
-                .textContent =
-                requirements.requiresAdditionalAuthentication
-                    ?? "—";
+        <span class="value">
+            ENABLED
+        </span>
 
-            document.getElementById("auditLog")
-                .textContent =
-                requirements.requiresAuditLog
-                    ?? "—";
+    </div>
 
-            document.getElementById("isolation")
-                .textContent =
-                requirements.requiresIsolation
-                    ?? "—";
 
-            document.getElementById("preExecutionReview")
-                .textContent =
-                requirements.requiresPreExecutionReview
-                    ?? "—";
+    <button
+        id="riskFloorTestButton"
+        class="riskTest"
+    >
+        TEST RISK FLOORS
+    </button>
 
-            document.getElementById("emergencyProtection")
-                .textContent =
-                requirements.requiresEmergencyProtection
-                    ?? "—";
-        }
 
+    <button
+        id="contextTestButton"
+        class="riskTest"
+    >
+        TEST ACTION CONTEXT
+    </button>
 
-        function evaluateCameraRisk() {
 
-            const cameraAction = {
+    <button
+        id="invalidTestButton"
+        class="riskTest"
+    >
+        TEST INVALID CONTEXT
+    </button>
 
-                name: "CAMERA_ACCESS_TEST",
 
-                permission: "CAMERA",
+    <div
+        id="riskTestResult"
+        class="test-result"
+    ></div>
 
-                dataSensitivity: "PRIVATE",
+</div>
 
-                externalEffect: "DEVICE",
 
-                reversibility: "REVERSIBLE",
+<!-- ========================================= -->
+<!-- A4.4 SECURITY REQUIREMENTS -->
+<!-- ========================================= -->
 
-                userImpact: "MEDIUM",
+<div class="card">
 
-                scope: "ONCE",
+    <div class="section-title">
+        A4.4 Security Requirements
+    </div>
 
-                actionType: "CAPTURE",
 
-                executionMode: "LOCAL",
+    <div class="row">
 
-                duration: "SINGLE"
+        <span>
+            Confirmation
+        </span>
 
-            };
+        <span
+            id="confirmationRequirement"
+            class="value"
+        >
+            —
+        </span>
 
+    </div>
 
-            const result =
-                engine.evaluate(
-                    cameraAction
-                );
 
+    <div class="row">
 
-            displayRisk(result);
+        <span>
+            Explicit Confirmation
+        </span>
 
+        <span
+            id="explicitConfirmationRequirement"
+            class="value"
+        >
+            —
+        </span>
 
-            log(
-                `Camera Risk: ${result.riskLevel}`
-            );
+    </div>
 
-            log(
-                `Score: ${result.riskScore}`
-            );
 
-            log(
-                `Confirmation: ${result.requirements.requiresConfirmation}`
-            );
+    <div class="row">
 
-            log(
-                `Explicit Confirmation: ${result.requirements.requiresExplicitConfirmation}`
-            );
+        <span>
+            Additional Authentication
+        </span>
 
-            log(
-                `Authentication: ${result.requirements.requiresAdditionalAuthentication}`
-            );
+        <span
+            id="authenticationRequirement"
+            class="value"
+        >
+            —
+        </span>
 
-            log(
-                `Audit: ${result.requirements.requiresAuditLog}`
-            );
+    </div>
 
-            log(
-                `Isolation: ${result.requirements.requiresIsolation}`
-            );
 
-            log(
-                `Pre-Execution Review: ${result.requirements.requiresPreExecutionReview}`
-            );
+    <div class="row">
 
-            log(
-                `Emergency Protection: ${result.requirements.requiresEmergencyProtection}`
-            );
-        }
+        <span>
+            Audit Log
+        </span>
 
+        <span
+            id="auditRequirement"
+            class="value"
+        >
+            —
+        </span>
 
-        window.testRiskFloors =
-            function () {
+    </div>
 
-                clearLog();
 
-                log("TEST: RISK FLOORS");
+    <div class="row">
 
-                const tests = [
+        <span>
+            Isolation
+        </span>
 
-                    {
-                        name: "Sensitive Network",
+        <span
+            id="isolationRequirement"
+            class="value"
+        >
+            —
+        </span>
 
-                        action: {
+    </div>
 
-                            name: "SENSITIVE_NETWORK",
 
-                            permission: "NETWORK",
+    <div class="row">
 
-                            dataSensitivity: "SENSITIVE",
+        <span>
+            Pre-Execution Review
+        </span>
 
-                            externalEffect: "NETWORK",
+        <span
+            id="preExecutionRequirement"
+            class="value"
+        >
+            —
+        </span>
 
-                            reversibility: "REVERSIBLE",
+    </div>
 
-                            userImpact: "LOW",
 
-                            scope: "ONCE",
+    <div class="row">
 
-                            actionType: "TRANSMIT",
+        <span>
+            Emergency Protection
+        </span>
 
-                            executionMode: "REMOTE",
+        <span
+            id="emergencyRequirement"
+            class="value"
+        >
+            —
+        </span>
 
-                            duration: "SINGLE"
-                        },
+    </div>
 
-                        expected: "HIGH"
-                    },
 
-                    {
-                        name: "Irreversible",
+    <button
+        id="securityRequirementsButton"
+        class="securityTest"
+    >
+        TEST SECURITY REQUIREMENTS
+    </button>
 
-                        action: {
 
-                            name: "IRREVERSIBLE",
+    <button
+        id="criticalRequirementsButton"
+        class="securityTest"
+    >
+        TEST CRITICAL REQUIREMENTS
+    </button>
 
-                            permission: "NONE",
 
-                            dataSensitivity: "PUBLIC",
+    <button
+        id="contextEscalationButton"
+        class="securityTest"
+    >
+        TEST CONTEXT ESCALATION
+    </button>
 
-                            externalEffect: "NONE",
 
-                            reversibility: "IRREVERSIBLE",
+    <div
+        id="securityTestResult"
+        class="test-result"
+    ></div>
 
-                            userImpact: "LOW",
+</div>
 
-                            scope: "ONCE",
 
-                            actionType: "WRITE",
+<!-- ========================================= -->
+<!-- EMERGENCY CONTROL -->
+<!-- ========================================= -->
 
-                            executionMode: "LOCAL",
+<div class="card">
 
-                            duration: "SINGLE"
-                        },
+    <strong>
+        Emergency Control
+    </strong>
 
-                        expected: "HIGH"
-                    },
 
-                    {
-                        name: "Irreversible High Impact",
+    <button
+        id="stopButton"
+        class="stop"
+    >
+        EMERGENCY STOP
+    </button>
 
-                        action: {
+</div>
 
-                            name: "CRITICAL_ACTION",
 
-                            permission: "NONE",
+<!-- ========================================= -->
+<!-- RESULT -->
+<!-- ========================================= -->
 
-                            dataSensitivity: "PUBLIC",
+<div id="result"></div>
 
-                            externalEffect: "NONE",
 
-                            reversibility: "IRREVERSIBLE",
+<!-- ========================================= -->
+<!-- SECURITY LOG -->
+<!-- ========================================= -->
 
-                            userImpact: "HIGH",
+<div class="card">
 
-                            scope: "ONCE",
+    <strong>
+        Security Log
+    </strong>
 
-                            actionType: "DELETE",
 
-                            executionMode: "LOCAL",
+    <div
+        id="log"
+        class="log"
+    >
+        No security events yet.
+    </div>
 
-                            duration: "SINGLE"
-                        },
+</div>
 
-                        expected: "CRITICAL"
-                    }
+</div>
 
-                ];
 
+<!-- ========================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================= -->
 
-                for (const test of tests) {
+<script type="module">
 
-                    const result =
-                        engine.evaluate(
-                            test.action
-                        );
+import {
+    RiskEngine
+}
+from "./js/security/RiskEngine.js";
 
-                    const pass =
-                        result.riskLevel ===
-                        test.expected;
 
-                    log(
-                        `${test.name}: ` +
-                        `${result.riskLevel} ` +
-                        `(expected ${test.expected})`,
-                        pass
-                    );
-                }
-            };
+const riskEngine =
+    new RiskEngine();
 
 
-        window.testActionContext =
-            function () {
+const logElement =
+    document.getElementById("log");
 
-                clearLog();
 
-                log("TEST: ACTION CONTEXT");
+const riskTestResult =
+    document.getElementById("riskTestResult");
 
 
-                const action = {
+const securityTestResult =
+    document.getElementById("securityTestResult");
 
-                    name: "CONTEXT_TEST",
 
-                    permission: "CAMERA",
+function log(message, status = null) {
 
-                    dataSensitivity: "PRIVATE",
+    const line =
+        document.createElement("div");
 
-                    externalEffect: "DEVICE",
+    line.textContent =
+        message;
 
-                    reversibility: "REVERSIBLE",
+    if (status === true) {
+        line.className = "pass";
+    }
 
-                    userImpact: "MEDIUM",
+    if (status === false) {
+        line.className = "fail";
+    }
 
-                    scope: "ONCE",
+    logElement.appendChild(line);
 
-                    actionType: "CAPTURE",
+    logElement.scrollTop =
+        logElement.scrollHeight;
+}
 
-                    executionMode: "LOCAL",
 
-                    duration: "SINGLE"
+function showTestResult(
+    element,
+    message,
+    passed
+) {
 
-                };
+    element.style.display =
+        "block";
 
+    element.textContent =
+        message;
 
-                const result =
-                    engine.evaluate(
-                        action
-                    );
+    element.className =
+        "test-result " +
+        (passed ? "pass" : "fail");
+}
 
 
-                const pass =
+function displayRisk(evaluation) {
 
-                    result.context.actionType ===
-                    "CAPTURE"
+    document.getElementById(
+        "actionType"
+    ).textContent =
+        evaluation.context?.actionType
+        || "—";
 
-                    &&
 
-                    result.context.executionMode ===
-                    "LOCAL"
+    document.getElementById(
+        "executionMode"
+    ).textContent =
+        evaluation.context?.executionMode
+        || "—";
 
-                    &&
 
-                    result.context.duration ===
-                    "SINGLE"
+    document.getElementById(
+        "duration"
+    ).textContent =
+        evaluation.context?.duration
+        || "—";
 
-                    &&
 
-                    result.context.scope ===
-                    "ONCE";
+    document.getElementById(
+        "baseRiskLevel"
+    ).textContent =
+        evaluation.baseRiskLevel
+        || "—";
 
 
-                log(
-                    `Context test: ${pass ? "PASS" : "FAIL"}`,
-                    pass
-                );
+    document.getElementById(
+        "riskLevel"
+    ).textContent =
+        evaluation.riskLevel
+        || "—";
 
-                displayRisk(result);
-            };
 
+    document.getElementById(
+        "riskScore"
+    ).textContent =
+        evaluation.riskScore
+        ?? "—";
 
-        window.testInvalidContext =
-            function () {
 
-                clearLog();
+    const requirements =
+        evaluation.requirements
+        || {};
 
-                log("TEST: INVALID CONTEXT");
 
+    document.getElementById(
+        "confirmationRequirement"
+    ).textContent =
+        requirements.requiresConfirmation
+        ?? "—";
 
-                const action = {
 
-                    name: "INVALID_TEST",
+    document.getElementById(
+        "explicitConfirmationRequirement"
+    ).textContent =
+        requirements.requiresExplicitConfirmation
+        ?? "—";
 
-                    permission: "NONE",
 
-                    dataSensitivity: "INVALID",
+    document.getElementById(
+        "authenticationRequirement"
+    ).textContent =
+        requirements.requiresAdditionalAuthentication
+        ?? "—";
 
-                    externalEffect: "NONE",
 
-                    reversibility: "REVERSIBLE",
+    document.getElementById(
+        "auditRequirement"
+    ).textContent =
+        requirements.requiresAuditLog
+        ?? "—";
 
-                    userImpact: "LOW",
 
-                    scope: "ONCE",
+    document.getElementById(
+        "isolationRequirement"
+    ).textContent =
+        requirements.requiresIsolation
+        ?? "—";
 
-                    actionType: "READ",
 
-                    executionMode: "LOCAL",
+    document.getElementById(
+        "preExecutionRequirement"
+    ).textContent =
+        requirements.requiresPreExecutionReview
+        ?? "—";
 
-                    duration: "SINGLE"
 
-                };
+    document.getElementById(
+        "emergencyRequirement"
+    ).textContent =
+        requirements.requiresEmergencyProtection
+        ?? "—";
+}
 
 
-                const result =
-                    engine.evaluate(
-                        action
-                    );
+/* ========================================= */
+/* CAMERA TEST */
+/* ========================================= */
 
+function evaluateCameraRisk() {
 
-                const pass =
-                    result.allowed === false
-                    &&
-                    result.riskLevel ===
-                    "CRITICAL";
+    const cameraAction = {
 
+        name:
+            "CAMERA_ACCESS_TEST",
 
-                log(
-                    `Invalid context: ${pass ? "PASS" : "FAIL"}`,
-                    pass
-                );
-            };
+        permission:
+            "CAMERA",
 
+        dataSensitivity:
+            "PRIVATE",
 
-        window.testSecurityRequirements =
-            function () {
+        externalEffect:
+            "DEVICE",
 
-                clearLog();
+        reversibility:
+            "REVERSIBLE",
 
-                log(
-                    "TEST: SECURITY REQUIREMENTS"
-                );
+        userImpact:
+            "MEDIUM",
 
+        scope:
+            "ONCE",
 
-                /*
-                 * LOW
-                 *
-                 * No permission
-                 * Public data
-                 * No external effect
-                 * Reversible
-                 * Low impact
-                 * Single execution
-                 */
+        actionType:
+            "CAPTURE",
 
-                const lowRead = {
+        executionMode:
+            "LOCAL",
 
-                    name: "LOW_READ_TEST",
+        duration:
+            "SINGLE"
+    };
 
-                    permission: "NONE",
 
-                    dataSensitivity: "PUBLIC",
-
-                    externalEffect: "NONE",
-
-                    reversibility: "REVERSIBLE",
-
-                    userImpact: "LOW",
-
-                    scope: "ONCE",
-
-                    actionType: "READ",
-
-                    executionMode: "LOCAL",
-
-                    duration: "SINGLE"
-                };
-
-
-                /*
-                 * MEDIUM
-                 *
-                 * Deliberately minimal MEDIUM action.
-                 *
-                 * userImpact MEDIUM = +1
-                 * WRITE = +1
-                 *
-                 * Total = 2 → MEDIUM
-                 */
-
-                const mediumWrite = {
-
-                    name: "MEDIUM_WRITE_TEST",
-
-                    permission: "NONE",
-
-                    dataSensitivity: "PUBLIC",
-
-                    externalEffect: "NONE",
-
-                    reversibility: "REVERSIBLE",
-
-                    userImpact: "MEDIUM",
-
-                    scope: "ONCE",
-
-                    actionType: "WRITE",
-
-                    executionMode: "LOCAL",
-
-                    duration: "SINGLE"
-                };
-
-
-                /*
-                 * HIGH
-                 *
-                 * Camera-style capture action.
-                 */
-
-                const highCapture = {
-
-                    name: "HIGH_CAPTURE_TEST",
-
-                    permission: "CAMERA",
-
-                    dataSensitivity: "PRIVATE",
-
-                    externalEffect: "DEVICE",
-
-                    reversibility: "REVERSIBLE",
-
-                    userImpact: "MEDIUM",
-
-                    scope: "ONCE",
-
-                    actionType: "CAPTURE",
-
-                    executionMode: "LOCAL",
-
-                    duration: "SINGLE"
-                };
-
-
-                const tests = [
-
-                    {
-                        name: "LOW READ",
-
-                        action: lowRead,
-
-                        expectedRisk: "LOW",
-
-                        confirmation: false,
-
-                        explicit: false,
-
-                        authentication: false,
-
-                        audit: true
-                    },
-
-                    {
-                        name: "MEDIUM WRITE",
-
-                        action: mediumWrite,
-
-                        expectedRisk: "MEDIUM",
-
-                        confirmation: true,
-
-                        explicit: false,
-
-                        authentication: false,
-
-                        audit: true
-                    },
-
-                    {
-                        name: "HIGH CAPTURE",
-
-                        action: highCapture,
-
-                        expectedRisk: "HIGH",
-
-                        confirmation: true,
-
-                        explicit: true,
-
-                        authentication: false,
-
-                        audit: true
-                    }
-
-                ];
-
-
-                for (const test of tests) {
-
-                    const result =
-                        engine.evaluate(
-                            test.action
-                        );
-
-
-                    const requirements =
-                        result.requirements;
-
-
-                    const pass =
-
-                        result.riskLevel ===
-                        test.expectedRisk
-
-                        &&
-
-                        requirements.requiresConfirmation ===
-                        test.confirmation
-
-                        &&
-
-                        requirements.requiresExplicitConfirmation ===
-                        test.explicit
-
-                        &&
-
-                        requirements.requiresAdditionalAuthentication ===
-                        test.authentication
-
-                        &&
-
-                        requirements.requiresAuditLog ===
-                        test.audit;
-
-
-                    log(
-                        `${test.name}: ` +
-                        `${pass ? "PASS" : "FAIL"} | ` +
-                        `Risk ${result.riskLevel} | ` +
-                        `Confirmation ${requirements.requiresConfirmation} | ` +
-                        `Authentication ${requirements.requiresAdditionalAuthentication} | ` +
-                        `Audit ${requirements.requiresAuditLog}`,
-                        pass
-                    );
-                }
-            };
-
-
-        window.testCriticalRequirements =
-            function () {
-
-                clearLog();
-
-                log(
-                    "TEST: CRITICAL REQUIREMENTS"
-                );
-
-
-                const criticalAction = {
-
-                    name: "CRITICAL_REMOTE_EXECUTION",
-
-                    permission: "SYSTEM",
-
-                    dataSensitivity: "SENSITIVE",
-
-                    externalEffect: "NETWORK",
-
-                    reversibility: "IRREVERSIBLE",
-
-                    userImpact: "HIGH",
-
-                    scope: "PERSISTENT",
-
-                    actionType: "EXECUTE",
-
-                    executionMode: "REMOTE",
-
-                    duration: "CONTINUOUS"
-                };
-
-
-                const result =
-                    engine.evaluate(
-                        criticalAction
-                    );
-
-
-                const requirements =
-                    result.requirements;
-
-
-                const pass =
-
-                    result.riskLevel ===
-                    "CRITICAL"
-
-                    &&
-
-                    requirements.requiresConfirmation ===
-                    true
-
-                    &&
-
-                    requirements.requiresExplicitConfirmation ===
-                    true
-
-                    &&
-
-                    requirements.requiresAdditionalAuthentication ===
-                    true
-
-                    &&
-
-                    requirements.requiresAuditLog ===
-                    true
-
-                    &&
-
-                    requirements.requiresIsolation ===
-                    true
-
-                    &&
-
-                    requirements.requiresPreExecutionReview ===
-                    true
-
-                    &&
-
-                    requirements.requiresEmergencyProtection ===
-                    true;
-
-
-                log(
-                    `Critical requirements: ` +
-                    `${pass ? "PASS" : "FAIL"}`,
-                    pass
-                );
-
-
-                displayRisk(result);
-            };
-
-
-        window.testContextEscalation =
-            function () {
-
-                clearLog();
-
-                log(
-                    "TEST: CONTEXT ESCALATION"
-                );
-
-
-                const tests = [
-
-                    {
-                        name: "REMOTE TRANSMISSION",
-
-                        action: {
-
-                            name: "REMOTE_TRANSMISSION",
-
-                            permission: "NETWORK",
-
-                            dataSensitivity: "PRIVATE",
-
-                            externalEffect: "NETWORK",
-
-                            reversibility: "REVERSIBLE",
-
-                            userImpact: "MEDIUM",
-
-                            scope: "ONCE",
-
-                            actionType: "TRANSMIT",
-
-                            executionMode: "REMOTE",
-
-                            duration: "SINGLE"
-                        }
-                    },
-
-                    {
-                        name: "REMOTE EXECUTION",
-
-                        action: {
-
-                            name: "REMOTE_EXECUTION",
-
-                            permission: "SYSTEM",
-
-                            dataSensitivity: "PRIVATE",
-
-                            externalEffect: "NETWORK",
-
-                            reversibility: "REVERSIBLE",
-
-                            userImpact: "MEDIUM",
-
-                            scope: "ONCE",
-
-                            actionType: "EXECUTE",
-
-                            executionMode: "REMOTE",
-
-                            duration: "SINGLE"
-                        }
-                    },
-
-                    {
-                        name: "CONTINUOUS SENSITIVE CAPTURE",
-
-                        action: {
-
-                            name: "CONTINUOUS_CAPTURE",
-
-                            permission: "CAMERA",
-
-                            dataSensitivity: "SENSITIVE",
-
-                            externalEffect: "DEVICE",
-
-                            reversibility: "REVERSIBLE",
-
-                            userImpact: "MEDIUM",
-
-                            scope: "SESSION",
-
-                            actionType: "CAPTURE",
-
-                            executionMode: "LOCAL",
-
-                            duration: "CONTINUOUS"
-                        }
-                    }
-
-                ];
-
-
-                for (const test of tests) {
-
-                    const result =
-                        engine.evaluate(
-                            test.action
-                        );
-
-
-                    const requirements =
-                        result.requirements;
-
-
-                    const pass =
-
-                        result.allowed === true
-
-                        &&
-
-                        requirements.requiresExplicitConfirmation ===
-                        true
-
-                        &&
-
-                        requirements.requiresPreExecutionReview ===
-                        true;
-
-
-                    log(
-                        `${test.name}: ` +
-                        `${pass ? "PASS" : "FAIL"} | ` +
-                        `Risk ${result.riskLevel} | ` +
-                        `Isolation ${requirements.requiresIsolation}`,
-                        pass
-                    );
-                }
-            };
-
-
-        log(
-            "RAIVEN Risk Engine v0.4 initialized."
+    const result =
+        riskEngine.evaluate(
+            cameraAction
         );
 
 
+    displayRisk(result);
+
+
+    log(
+        "Camera Risk: " +
+        result.riskLevel
+    );
+
+    log(
+        "Camera Score: " +
+        result.riskScore
+    );
+}
+
+
+/* ========================================= */
+/* A4.3 — RISK FLOORS */
+/* ========================================= */
+
+document.getElementById(
+    "riskFloorTestButton"
+).addEventListener(
+    "click",
+    () => {
+
+        riskTestResult.style.display =
+            "block";
+
+        riskTestResult.textContent =
+            "";
+
+        let allPassed = true;
+
+
+        const tests = [
+
+            {
+                name:
+                    "Sensitive Network",
+
+                action: {
+
+                    name:
+                        "SENSITIVE_NETWORK",
+
+                    permission:
+                        "NETWORK",
+
+                    dataSensitivity:
+                        "SENSITIVE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "TRANSMIT",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+                },
+
+                expected:
+                    "HIGH"
+            },
+
+
+            {
+                name:
+                    "Irreversible Action",
+
+                action: {
+
+                    name:
+                        "IRREVERSIBLE",
+
+                    permission:
+                        "NONE",
+
+                    dataSensitivity:
+                        "PUBLIC",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "IRREVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "WRITE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+                },
+
+                expected:
+                    "HIGH"
+            },
+
+
+            {
+                name:
+                    "Irreversible High Impact",
+
+                action: {
+
+                    name:
+                        "CRITICAL_ACTION",
+
+                    permission:
+                        "NONE",
+
+                    dataSensitivity:
+                        "PUBLIC",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "IRREVERSIBLE",
+
+                    userImpact:
+                        "HIGH",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "DELETE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+                },
+
+                expected:
+                    "CRITICAL"
+            }
+
+        ];
+
+
+        for (
+            const test of tests
+        ) {
+
+            const result =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const passed =
+                result.riskLevel ===
+                test.expected;
+
+
+            if (!passed) {
+                allPassed = false;
+            }
+
+
+            const line =
+                `${test.name}: ` +
+                `${result.riskLevel} ` +
+                `(expected ${test.expected})`;
+
+
+            log(
+                line,
+                passed
+            );
+
+
+            riskTestResult.textContent +=
+                line + "\n";
+        }
+
+
+        riskTestResult.textContent +=
+            "\nRESULT: " +
+            (allPassed
+                ? "ALL TESTS PASSED"
+                : "TEST FAILURE");
+
+    }
+);
+
+
+/* ========================================= */
+/* A4.3 — ACTION CONTEXT */
+/* ========================================= */
+
+document.getElementById(
+    "contextTestButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "CONTEXT_TEST",
+
+            permission:
+                "CAMERA",
+
+            dataSensitivity:
+                "PRIVATE",
+
+            externalEffect:
+                "DEVICE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "MEDIUM",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const result =
+            riskEngine.evaluate(
+                action
+            );
+
+
+        const passed =
+
+            result.context.actionType ===
+            "CAPTURE"
+
+            &&
+
+            result.context.executionMode ===
+            "LOCAL"
+
+            &&
+
+            result.context.duration ===
+            "SINGLE"
+
+            &&
+
+            result.context.scope ===
+            "ONCE";
+
+
+        log(
+            "Action Context: " +
+            (passed
+                ? "PASS"
+                : "FAIL"),
+            passed
+        );
+
+
+        displayRisk(result);
+
+
+        riskTestResult.style.display =
+            "block";
+
+        riskTestResult.textContent =
+            "ACTION CONTEXT TEST: " +
+            (passed
+                ? "PASS"
+                : "FAIL");
+    }
+);
+
+
+/* ========================================= */
+/* A4.3 — INVALID CONTEXT */
+/* ========================================= */
+
+document.getElementById(
+    "invalidTestButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const invalidAction = {
+
+            name:
+                "INVALID_CONTEXT",
+
+            permission:
+                "NONE",
+
+            dataSensitivity:
+                "INVALID",
+
+            externalEffect:
+                "NONE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "LOW",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "READ",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const result =
+            riskEngine.evaluate(
+                invalidAction
+            );
+
+
+        const passed =
+
+            result.allowed === false
+
+            &&
+
+            result.riskLevel ===
+            "CRITICAL";
+
+
+        log(
+            "Invalid Context: " +
+            (passed
+                ? "PASS"
+                : "FAIL"),
+            passed
+        );
+
+
+        riskTestResult.style.display =
+            "block";
+
+        riskTestResult.textContent =
+            "INVALID CONTEXT TEST: " +
+            (passed
+                ? "PASS"
+                : "FAIL");
+    }
+);
+
+
+/* ========================================= */
+/* A4.4 — SECURITY REQUIREMENTS */
+/* ========================================= */
+
+document.getElementById(
+    "securityRequirementsButton"
+).addEventListener(
+    "click",
+    () => {
+
+        securityTestResult.style.display =
+            "block";
+
+        securityTestResult.textContent =
+            "";
+
+        let allPassed = true;
+
+
+        /*
+         * LOW READ
+         *
+         * Score:
+         * 0
+         *
+         * Expected:
+         * LOW
+         */
+
+        const lowRead = {
+
+            name:
+                "LOW_READ_TEST",
+
+            permission:
+                "NONE",
+
+            dataSensitivity:
+                "PUBLIC",
+
+            externalEffect:
+                "NONE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "LOW",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "READ",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        /*
+         * MEDIUM WRITE
+         *
+         * IMPORTANT:
+         *
+         * userImpact MEDIUM = +1
+         * WRITE = +1
+         *
+         * Total = 2
+         *
+         * Score 2 = MEDIUM
+         */
+
+        const mediumWrite = {
+
+            name:
+                "MEDIUM_WRITE_TEST",
+
+            permission:
+                "NONE",
+
+            dataSensitivity:
+                "PUBLIC",
+
+            externalEffect:
+                "NONE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "MEDIUM",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "WRITE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        /*
+         * HIGH CAPTURE
+         *
+         * Permission + PRIVATE
+         * + DEVICE + MEDIUM IMPACT
+         * + CAPTURE
+         *
+         * Expected HIGH
+         */
+
+        const highCapture = {
+
+            name:
+                "HIGH_CAPTURE_TEST",
+
+            permission:
+                "CAMERA",
+
+            dataSensitivity:
+                "PRIVATE",
+
+            externalEffect:
+                "DEVICE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "MEDIUM",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const tests = [
+
+            {
+                name:
+                    "LOW READ",
+
+                action:
+                    lowRead,
+
+                risk:
+                    "LOW",
+
+                confirmation:
+                    false,
+
+                explicit:
+                    false,
+
+                authentication:
+                    false,
+
+                audit:
+                    true
+            },
+
+
+            {
+                name:
+                    "MEDIUM WRITE",
+
+                action:
+                    mediumWrite,
+
+                risk:
+                    "MEDIUM",
+
+                confirmation:
+                    true,
+
+                explicit:
+                    false,
+
+                authentication:
+                    false,
+
+                audit:
+                    true
+            },
+
+
+            {
+                name:
+                    "HIGH CAPTURE",
+
+                action:
+                    highCapture,
+
+                risk:
+                    "HIGH",
+
+                confirmation:
+                    true,
+
+                explicit:
+                    true,
+
+                authentication:
+                    false,
+
+                audit:
+                    true
+            }
+
+        ];
+
+
+        for (
+            const test of tests
+        ) {
+
+            const result =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const requirements =
+                result.requirements;
+
+
+            const passed =
+
+                result.riskLevel ===
+                test.risk
+
+                &&
+
+                requirements.requiresConfirmation ===
+                test.confirmation
+
+                &&
+
+                requirements.requiresExplicitConfirmation ===
+                test.explicit
+
+                &&
+
+                requirements.requiresAdditionalAuthentication ===
+                test.authentication
+
+                &&
+
+                requirements.requiresAuditLog ===
+                test.audit;
+
+
+            if (!passed) {
+                allPassed = false;
+            }
+
+
+            const line =
+
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}\n` +
+
+                `Risk: ${result.riskLevel}\n` +
+
+                `Confirmation: ` +
+                `${requirements.requiresConfirmation}\n` +
+
+                `Explicit Confirmation: ` +
+                `${requirements.requiresExplicitConfirmation}\n` +
+
+                `Authentication: ` +
+                `${requirements.requiresAdditionalAuthentication}\n` +
+
+                `Audit: ` +
+                `${requirements.requiresAuditLog}\n`;
+
+
+            log(
+                line,
+                passed
+            );
+
+
+            securityTestResult.textContent +=
+                line + "\n";
+        }
+
+
+        securityTestResult.textContent +=
+            "FINAL RESULT: " +
+            (
+                allPassed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.4 — CRITICAL REQUIREMENTS */
+/* ========================================= */
+
+document.getElementById(
+    "criticalRequirementsButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "CRITICAL_REMOTE_EXECUTION",
+
+            permission:
+                "SYSTEM",
+
+            dataSensitivity:
+                "SENSITIVE",
+
+            externalEffect:
+                "NETWORK",
+
+            reversibility:
+                "IRREVERSIBLE",
+
+            userImpact:
+                "HIGH",
+
+            scope:
+                "PERSISTENT",
+
+            actionType:
+                "EXECUTE",
+
+            executionMode:
+                "REMOTE",
+
+            duration:
+                "CONTINUOUS"
+        };
+
+
+        const result =
+            riskEngine.evaluate(
+                action
+            );
+
+
+        const requirements =
+            result.requirements;
+
+
+        const passed =
+
+            result.riskLevel ===
+            "CRITICAL"
+
+            &&
+
+            requirements.requiresConfirmation ===
+            true
+
+            &&
+
+            requirements.requiresExplicitConfirmation ===
+            true
+
+            &&
+
+            requirements.requiresAdditionalAuthentication ===
+            true
+
+            &&
+
+            requirements.requiresAuditLog ===
+            true
+
+            &&
+
+            requirements.requiresIsolation ===
+            true
+
+            &&
+
+            requirements.requiresPreExecutionReview ===
+            true
+
+            &&
+
+            requirements.requiresEmergencyProtection ===
+            true;
+
+
+        displayRisk(result);
+
+
+        log(
+            "Critical Requirements: " +
+            (passed
+                ? "PASS"
+                : "FAIL"),
+            passed
+        );
+
+
+        securityTestResult.style.display =
+            "block";
+
+        securityTestResult.textContent =
+
+            "CRITICAL REQUIREMENTS\n\n" +
+
+            `Risk: ${result.riskLevel}\n` +
+
+            `Confirmation: ${
+                requirements.requiresConfirmation
+            }\n` +
+
+            `Explicit Confirmation: ${
+                requirements.requiresExplicitConfirmation
+            }\n` +
+
+            `Authentication: ${
+                requirements.requiresAdditionalAuthentication
+            }\n` +
+
+            `Audit: ${
+                requirements.requiresAuditLog
+            }\n` +
+
+            `Isolation: ${
+                requirements.requiresIsolation
+            }\n` +
+
+            `Pre-Execution Review: ${
+                requirements.requiresPreExecutionReview
+            }\n` +
+
+            `Emergency Protection: ${
+                requirements.requiresEmergencyProtection
+            }\n\n` +
+
+            "RESULT: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.4 — CONTEXT ESCALATION */
+/* ========================================= */
+
+document.getElementById(
+    "contextEscalationButton"
+).addEventListener(
+    "click",
+    () => {
+
+        securityTestResult.style.display =
+            "block";
+
+        securityTestResult.textContent =
+            "";
+
+        let allPassed = true;
+
+
+        const tests = [
+
+            {
+                name:
+                    "REMOTE TRANSMISSION",
+
+                action: {
+
+                    name:
+                        "REMOTE_TRANSMISSION",
+
+                    permission:
+                        "NETWORK",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "TRANSMIT",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+                }
+            },
+
+
+            {
+                name:
+                    "REMOTE EXECUTION",
+
+                action: {
+
+                    name:
+                        "REMOTE_EXECUTION",
+
+                    permission:
+                        "SYSTEM",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "EXECUTE",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+                }
+            },
+
+
+            {
+                name:
+                    "CONTINUOUS SENSITIVE CAPTURE",
+
+                action: {
+
+                    name:
+                        "CONTINUOUS_CAPTURE",
+
+                    permission:
+                        "CAMERA",
+
+                    dataSensitivity:
+                        "SENSITIVE",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "SESSION",
+
+                    actionType:
+                        "CAPTURE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "CONTINUOUS"
+                }
+            }
+
+        ];
+
+
+        for (
+            const test of tests
+        ) {
+
+            const result =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const requirements =
+                result.requirements;
+
+
+            const passed =
+
+                result.allowed === true
+
+                &&
+
+                requirements.requiresExplicitConfirmation ===
+                true
+
+                &&
+
+                requirements.requiresPreExecutionReview ===
+                true;
+
+
+            if (!passed) {
+                allPassed = false;
+            }
+
+
+            const line =
+
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"} | ` +
+
+                `Risk: ${result.riskLevel} | ` +
+
+                `Explicit: ${
+                    requirements.requiresExplicitConfirmation
+                } | ` +
+
+                `Pre-Review: ${
+                    requirements.requiresPreExecutionReview
+                } | ` +
+
+                `Isolation: ${
+                    requirements.requiresIsolation
+                }`;
+
+
+            log(
+                line,
+                passed
+            );
+
+
+            securityTestResult.textContent +=
+                line + "\n";
+        }
+
+
+        securityTestResult.textContent +=
+            "\nFINAL RESULT: " +
+            (
+                allPassed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* PROTECTED ACTION */
+/* ========================================= */
+
+document.getElementById(
+    "testActionButton"
+).addEventListener(
+    "click",
+    () => {
+
         evaluateCameraRisk();
 
-    </script>
+        log(
+            "Protected camera action evaluated."
+        );
+    }
+);
+
+
+/* ========================================= */
+/* ALLOW / DENY */
+/* ========================================= */
+
+document.getElementById(
+    "allowButton"
+).addEventListener(
+    "click",
+    () => {
+
+        log(
+            "CAMERA permission requested: ALLOW ONCE"
+        );
+    }
+);
+
+
+document.getElementById(
+    "denyButton"
+).addEventListener(
+    "click",
+    () => {
+
+        log(
+            "CAMERA permission denied."
+        );
+    }
+);
+
+
+/* ========================================= */
+/* EMERGENCY STOP */
+/* ========================================= */
+
+document.getElementById(
+    "stopButton"
+).addEventListener(
+    "click",
+    () => {
+
+        document.getElementById(
+            "securityStatus"
+        ).textContent =
+            "EMERGENCY STOPPED";
+
+
+        document.getElementById(
+            "securityStatus"
+        ).className =
+            "fail";
+
+
+        log(
+            "EMERGENCY STOP ACTIVATED."
+        );
+    }
+);
+
+
+/* ========================================= */
+/* INITIALIZATION */
+/* ========================================= */
+
+log(
+    "RAIVEN Risk Engine v0.4 initialized."
+);
+
+evaluateCameraRisk();
+
+</script>
 
 </body>
 
