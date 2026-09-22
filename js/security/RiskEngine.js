@@ -1,28 +1,26 @@
-// RAIVEN Risk Engine v0.2
-// Stage A4.2
+// RAIVEN Risk Engine v0.3
+// Stage A4.3
 //
-// Purpose:
-// Strong, deterministic risk classification.
+// Risk Context & Action Classification
 //
 // IMPORTANT:
 // RiskEngine NEVER grants permission.
 // RiskEngine NEVER executes actions.
-// RiskEngine ONLY evaluates risk and
-// security requirements.
+// RiskEngine ONLY evaluates and classifies risk.
 
 
 export class RiskEngine {
 
     constructor() {
 
-        this.version = "0.2";
+        this.version = "0.3";
 
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // RISK LEVELS
-    // --------------------------------------------------
+    // ==================================================
 
     static LEVELS = Object.freeze({
 
@@ -37,9 +35,9 @@ export class RiskEngine {
     });
 
 
-    // --------------------------------------------------
+    // ==================================================
     // ALLOWED VALUES
-    // --------------------------------------------------
+    // ==================================================
 
     static VALUES = Object.freeze({
 
@@ -70,14 +68,33 @@ export class RiskEngine {
             "ONCE",
             "SESSION",
             "PERSISTENT"
+        ],
+
+        actionType: [
+            "READ",
+            "WRITE",
+            "CAPTURE",
+            "TRANSMIT",
+            "DELETE",
+            "EXECUTE"
+        ],
+
+        executionMode: [
+            "LOCAL",
+            "REMOTE"
+        ],
+
+        duration: [
+            "SINGLE",
+            "CONTINUOUS"
         ]
 
     });
 
 
-    // --------------------------------------------------
+    // ==================================================
     // VALIDATE ACTION
-    // --------------------------------------------------
+    // ==================================================
 
     validateAction(action) {
 
@@ -97,16 +114,23 @@ export class RiskEngine {
         }
 
 
-        const fields = [
+        const requiredFields = [
+
             "dataSensitivity",
             "externalEffect",
             "reversibility",
             "userImpact",
-            "scope"
+            "scope",
+            "actionType",
+            "executionMode",
+            "duration"
+
         ];
 
 
-        for (const field of fields) {
+        for (
+            const field of requiredFields
+        ) {
 
             const value =
                 action[field];
@@ -114,7 +138,7 @@ export class RiskEngine {
 
             if (
                 !RiskEngine.VALUES[field]
-                .includes(value)
+                    .includes(value)
             ) {
 
                 return {
@@ -142,16 +166,49 @@ export class RiskEngine {
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
+    // CLASSIFY ACTION CONTEXT
+    // ==================================================
+
+    classifyContext(action) {
+
+        return {
+
+            actionType:
+                action.actionType,
+
+            executionMode:
+                action.executionMode,
+
+            duration:
+                action.duration,
+
+            scope:
+                action.scope,
+
+            externalEffect:
+                action.externalEffect,
+
+            dataSensitivity:
+                action.dataSensitivity
+
+        };
+
+    }
+
+
+    // ==================================================
     // CALCULATE SCORE
-    // --------------------------------------------------
+    // ==================================================
 
     calculateScore(action) {
 
         let score = 0;
 
 
-        // Permission
+        // ----------------------------------------------
+        // PERMISSION
+        // ----------------------------------------------
 
         if (
             action.permission &&
@@ -163,7 +220,9 @@ export class RiskEngine {
         }
 
 
-        // Data sensitivity
+        // ----------------------------------------------
+        // DATA SENSITIVITY
+        // ----------------------------------------------
 
         if (
             action.dataSensitivity === "PRIVATE"
@@ -183,7 +242,9 @@ export class RiskEngine {
         }
 
 
-        // External effect
+        // ----------------------------------------------
+        // EXTERNAL EFFECT
+        // ----------------------------------------------
 
         if (
             action.externalEffect === "DEVICE"
@@ -203,7 +264,9 @@ export class RiskEngine {
         }
 
 
-        // Reversibility
+        // ----------------------------------------------
+        // REVERSIBILITY
+        // ----------------------------------------------
 
         if (
             action.reversibility === "IRREVERSIBLE"
@@ -214,7 +277,9 @@ export class RiskEngine {
         }
 
 
-        // User impact
+        // ----------------------------------------------
+        // USER IMPACT
+        // ----------------------------------------------
 
         if (
             action.userImpact === "MEDIUM"
@@ -234,7 +299,9 @@ export class RiskEngine {
         }
 
 
-        // Scope
+        // ----------------------------------------------
+        // SCOPE
+        // ----------------------------------------------
 
         if (
             action.scope === "SESSION"
@@ -254,32 +321,113 @@ export class RiskEngine {
         }
 
 
+        // ----------------------------------------------
+        // ACTION TYPE
+        // ----------------------------------------------
+
+        if (
+            action.actionType === "WRITE"
+        ) {
+
+            score += 1;
+
+        }
+
+
+        if (
+            action.actionType === "CAPTURE"
+        ) {
+
+            score += 1;
+
+        }
+
+
+        if (
+            action.actionType === "TRANSMIT"
+        ) {
+
+            score += 2;
+
+        }
+
+
+        if (
+            action.actionType === "DELETE"
+        ) {
+
+            score += 2;
+
+        }
+
+
+        if (
+            action.actionType === "EXECUTE"
+        ) {
+
+            score += 2;
+
+        }
+
+
+        // ----------------------------------------------
+        // REMOTE EXECUTION
+        // ----------------------------------------------
+
+        if (
+            action.executionMode === "REMOTE"
+        ) {
+
+            score += 1;
+
+        }
+
+
+        // ----------------------------------------------
+        // CONTINUOUS EXECUTION
+        // ----------------------------------------------
+
+        if (
+            action.duration === "CONTINUOUS"
+        ) {
+
+            score += 1;
+
+        }
+
+
         return score;
 
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // BASE CLASSIFICATION
-    // --------------------------------------------------
+    // ==================================================
 
     classifyScore(score) {
 
-        if (score <= 1) {
+        if (
+            score <= 1
+        ) {
 
             return "LOW";
 
         }
 
 
-        if (score <= 3) {
+        if (
+            score <= 3
+        ) {
 
             return "MEDIUM";
 
         }
 
 
-        if (score <= 6) {
+        if (
+            score <= 6
+        ) {
 
             return "HIGH";
 
@@ -291,94 +439,133 @@ export class RiskEngine {
     }
 
 
-    // --------------------------------------------------
-    // RISK FLOOR
-    // --------------------------------------------------
+    // ==================================================
+    // RISK FLOORS
+    // ==================================================
 
-    applyRiskFloor(action, currentLevel) {
+    applyRiskFloor(
+        action,
+        currentLevel
+    ) {
 
         let level =
-            RiskEngine.LEVELS[currentLevel];
+            RiskEngine.LEVELS[
+                currentLevel
+            ];
 
 
-        /*
-        ----------------------------------------------
-        SENSITIVE DATA + NETWORK
-
-        Cannot be below HIGH.
-        ----------------------------------------------
-        */
-
+        // Sensitive + Network
         if (
             action.dataSensitivity === "SENSITIVE" &&
             action.externalEffect === "NETWORK"
         ) {
 
             level = Math.max(
+
                 level,
+
                 RiskEngine.LEVELS.HIGH
+
             );
 
         }
 
 
-        /*
-        ----------------------------------------------
-        IRREVERSIBLE ACTION
-
-        Cannot be below HIGH.
-        ----------------------------------------------
-        */
-
+        // Irreversible
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
 
             level = Math.max(
+
                 level,
+
                 RiskEngine.LEVELS.HIGH
+
             );
 
         }
 
 
-        /*
-        ----------------------------------------------
-        IRREVERSIBLE + HIGH IMPACT
-
-        Must be CRITICAL.
-        ----------------------------------------------
-        */
-
+        // Irreversible + High impact
         if (
             action.reversibility === "IRREVERSIBLE" &&
             action.userImpact === "HIGH"
         ) {
 
             level = Math.max(
+
                 level,
+
                 RiskEngine.LEVELS.CRITICAL
+
             );
 
         }
 
 
-        /*
-        ----------------------------------------------
-        PERSISTENT + SENSITIVE
-
-        Must be at least HIGH.
-        ----------------------------------------------
-        */
-
+        // Persistent + Sensitive
         if (
             action.scope === "PERSISTENT" &&
             action.dataSensitivity === "SENSITIVE"
         ) {
 
             level = Math.max(
+
                 level,
+
                 RiskEngine.LEVELS.HIGH
+
+            );
+
+        }
+
+
+        // Delete
+        if (
+            action.actionType === "DELETE"
+        ) {
+
+            level = Math.max(
+
+                level,
+
+                RiskEngine.LEVELS.HIGH
+
+            );
+
+        }
+
+
+        // Execute remotely
+        if (
+            action.actionType === "EXECUTE" &&
+            action.executionMode === "REMOTE"
+        ) {
+
+            level = Math.max(
+
+                level,
+
+                RiskEngine.LEVELS.HIGH
+
+            );
+
+        }
+
+
+        // Sensitive continuous access
+        if (
+            action.dataSensitivity === "SENSITIVE" &&
+            action.duration === "CONTINUOUS"
+        ) {
+
+            level = Math.max(
+
+                level,
+
+                RiskEngine.LEVELS.HIGH
+
             );
 
         }
@@ -387,16 +574,18 @@ export class RiskEngine {
         return Object.keys(
             RiskEngine.LEVELS
         ).find(
+
             key =>
                 RiskEngine.LEVELS[key] === level
+
         );
 
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // SECURITY REQUIREMENTS
-    // --------------------------------------------------
+    // ==================================================
 
     getRequirements(riskLevel) {
 
@@ -481,25 +670,25 @@ export class RiskEngine {
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // FULL EVALUATION
-    // --------------------------------------------------
+    // ==================================================
 
     evaluate(action) {
 
         const validation =
-            this.validateAction(action);
+            this.validateAction(
+                action
+            );
 
 
-        /*
-        ----------------------------------------------
-        FAIL CLOSED
+        // ----------------------------------------------
+        // FAIL CLOSED
+        // ----------------------------------------------
 
-        Invalid input becomes CRITICAL.
-        ----------------------------------------------
-        */
-
-        if (!validation.valid) {
+        if (
+            !validation.valid
+        ) {
 
             return Object.freeze({
 
@@ -511,7 +700,8 @@ export class RiskEngine {
 
                 riskScore: null,
 
-                riskLevel: "CRITICAL",
+                riskLevel:
+                    "CRITICAL",
 
                 reason:
                     validation.reason,
@@ -532,20 +722,53 @@ export class RiskEngine {
         }
 
 
-        const score =
-            this.calculateScore(action);
+        // ----------------------------------------------
+        // CONTEXT
+        // ----------------------------------------------
 
+        const context =
+            this.classifyContext(
+                action
+            );
+
+
+        // ----------------------------------------------
+        // SCORE
+        // ----------------------------------------------
+
+        const score =
+            this.calculateScore(
+                action
+            );
+
+
+        // ----------------------------------------------
+        // BASE LEVEL
+        // ----------------------------------------------
 
         const baseLevel =
-            this.classifyScore(score);
+            this.classifyScore(
+                score
+            );
 
+
+        // ----------------------------------------------
+        // FINAL LEVEL
+        // ----------------------------------------------
 
         const riskLevel =
             this.applyRiskFloor(
+
                 action,
+
                 baseLevel
+
             );
 
+
+        // ----------------------------------------------
+        // REQUIREMENTS
+        // ----------------------------------------------
 
         const requirements =
             this.getRequirements(
@@ -553,14 +776,9 @@ export class RiskEngine {
             );
 
 
-        /*
-        ----------------------------------------------
-        IMMUTABLE RESULT
-
-        The caller cannot directly modify
-        the evaluation result.
-        ----------------------------------------------
-        */
+        // ----------------------------------------------
+        // IMMUTABLE RESULT
+        // ----------------------------------------------
 
         return Object.freeze({
 
@@ -581,8 +799,12 @@ export class RiskEngine {
                 baseLevel,
 
             riskLevel:
-
                 riskLevel,
+
+            context:
+                Object.freeze(
+                    context
+                ),
 
             requirements:
                 Object.freeze(
