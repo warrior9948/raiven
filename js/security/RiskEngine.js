@@ -1,18 +1,19 @@
-// RAIVEN Risk Engine v0.4
-// Stage A4.4
+// RAIVEN Risk Engine v0.5
+// Stage A4.5
 //
-// Security Requirement Escalation
+// Risk Decision Consistency
 //
 // IMPORTANT:
 // RiskEngine NEVER grants permission.
 // RiskEngine NEVER executes actions.
-// RiskEngine ONLY evaluates risk
-// and determines required security controls.
+// RiskEngine ONLY evaluates risk,
+// determines security requirements,
+// and verifies requirement consistency.
 
 export class RiskEngine {
 
     constructor() {
-        this.version = "0.4";
+        this.version = "0.5";
     }
 
     static LEVELS = Object.freeze({
@@ -74,6 +75,35 @@ export class RiskEngine {
     });
 
 
+    /*
+     * A4.5
+     *
+     * Security controls ordered from
+     * weakest to strongest.
+     *
+     * A stronger risk level must never
+     * lose a control required by a
+     * weaker risk level.
+     */
+
+    static REQUIREMENT_ORDER = Object.freeze({
+
+        requiresConfirmation: 1,
+
+        requiresExplicitConfirmation: 2,
+
+        requiresAdditionalAuthentication: 3,
+
+        requiresAuditLog: 1,
+
+        requiresIsolation: 4,
+
+        requiresPreExecutionReview: 3,
+
+        requiresEmergencyProtection: 3
+    });
+
+
     validateAction(action) {
 
         if (
@@ -108,6 +138,7 @@ export class RiskEngine {
                 !RiskEngine.VALUES[field]
                     .includes(value)
             ) {
+
                 return {
                     valid: false,
                     reason:
@@ -291,6 +322,7 @@ export class RiskEngine {
             action.dataSensitivity === "SENSITIVE" &&
             action.externalEffect === "NETWORK"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -300,6 +332,7 @@ export class RiskEngine {
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -310,6 +343,7 @@ export class RiskEngine {
             action.reversibility === "IRREVERSIBLE" &&
             action.userImpact === "HIGH"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.CRITICAL
@@ -320,6 +354,7 @@ export class RiskEngine {
             action.scope === "PERSISTENT" &&
             action.dataSensitivity === "SENSITIVE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -329,6 +364,7 @@ export class RiskEngine {
         if (
             action.actionType === "DELETE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -339,6 +375,7 @@ export class RiskEngine {
             action.actionType === "EXECUTE" &&
             action.executionMode === "REMOTE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -349,6 +386,7 @@ export class RiskEngine {
             action.dataSensitivity === "SENSITIVE" &&
             action.duration === "CONTINUOUS"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -367,10 +405,10 @@ export class RiskEngine {
     /*
      * A4.4
      *
-     * Determines the security controls
-     * required before an action may proceed.
+     * Determines required security
+     * controls.
      *
-     * This method DOES NOT enforce them.
+     * DOES NOT enforce them.
      */
 
     getRequirements(
@@ -395,10 +433,6 @@ export class RiskEngine {
             requiresEmergencyProtection: false
         };
 
-
-        /*
-         * Risk-level requirements
-         */
 
         if (
             riskLevel === "MEDIUM"
@@ -452,14 +486,12 @@ export class RiskEngine {
 
 
         /*
-         * Context-aware escalation
+         * Context escalation
          */
 
         if (
-            action
-                .actionType === "EXECUTE" &&
-            action
-                .executionMode === "REMOTE"
+            action.actionType === "EXECUTE" &&
+            action.executionMode === "REMOTE"
         ) {
 
             requirements
@@ -474,8 +506,7 @@ export class RiskEngine {
 
 
         if (
-            action
-                .actionType === "DELETE"
+            action.actionType === "DELETE"
         ) {
 
             requirements
@@ -490,10 +521,8 @@ export class RiskEngine {
 
 
         if (
-            action
-                .dataSensitivity === "SENSITIVE" &&
-            action
-                .duration === "CONTINUOUS"
+            action.dataSensitivity === "SENSITIVE" &&
+            action.duration === "CONTINUOUS"
         ) {
 
             requirements
@@ -514,10 +543,8 @@ export class RiskEngine {
 
 
         if (
-            action
-                .externalEffect === "NETWORK" &&
-            action
-                .actionType === "TRANSMIT"
+            action.externalEffect === "NETWORK" &&
+            action.actionType === "TRANSMIT"
         ) {
 
             requirements
@@ -529,10 +556,7 @@ export class RiskEngine {
 
 
         /*
-         * Final safety rule:
-         *
-         * Any CRITICAL action must have
-         * every security control enabled.
+         * CRITICAL safety invariant
          */
 
         if (
@@ -563,6 +587,327 @@ export class RiskEngine {
 
 
         return requirements;
+    }
+
+
+    /*
+     * A4.5
+     *
+     * Converts a requirement set into
+     * a comparable security profile.
+     */
+
+    getRequirementLevel(
+        requirement
+    ) {
+
+        if (
+            requirement === true
+        ) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+
+    /*
+     * A4.5
+     *
+     * Checks whether every required
+     * security control is present.
+     */
+
+    validateRequirementSet(
+        requirements
+    ) {
+
+        if (
+            !requirements ||
+            typeof requirements !== "object"
+        ) {
+
+            return {
+                valid: false,
+                reason: "INVALID_REQUIREMENTS"
+            };
+        }
+
+        const fields = [
+            "requiresConfirmation",
+            "requiresExplicitConfirmation",
+            "requiresAdditionalAuthentication",
+            "requiresAuditLog",
+            "requiresIsolation",
+            "requiresPreExecutionReview",
+            "requiresEmergencyProtection"
+        ];
+
+        for (
+            const field of fields
+        ) {
+
+            if (
+                typeof requirements[field] !== "boolean"
+            ) {
+
+                return {
+                    valid: false,
+                    reason:
+                        `INVALID_REQUIREMENT_${field.toUpperCase()}`
+                };
+            }
+        }
+
+        /*
+         * Explicit confirmation logically
+         * requires ordinary confirmation.
+         */
+
+        if (
+            requirements.requiresExplicitConfirmation &&
+            !requirements.requiresConfirmation
+        ) {
+
+            return {
+                valid: false,
+                reason:
+                    "EXPLICIT_CONFIRMATION_WITHOUT_CONFIRMATION"
+            };
+        }
+
+        /*
+         * Additional authentication is
+         * only meaningful when confirmation
+         * exists.
+         */
+
+        if (
+            requirements.requiresAdditionalAuthentication &&
+            !requirements.requiresConfirmation
+        ) {
+
+            return {
+                valid: false,
+                reason:
+                    "AUTHENTICATION_WITHOUT_CONFIRMATION"
+            };
+        }
+
+        /*
+         * Isolation requires pre-execution
+         * review.
+         */
+
+        if (
+            requirements.requiresIsolation &&
+            !requirements.requiresPreExecutionReview
+        ) {
+
+            return {
+                valid: false,
+                reason:
+                    "ISOLATION_WITHOUT_PRE_EXECUTION_REVIEW"
+            };
+        }
+
+        /*
+         * Emergency protection must always
+         * have an audit trail.
+         */
+
+        if (
+            requirements.requiresEmergencyProtection &&
+            !requirements.requiresAuditLog
+        ) {
+
+            return {
+                valid: false,
+                reason:
+                    "EMERGENCY_PROTECTION_WITHOUT_AUDIT_LOG"
+            };
+        }
+
+        return {
+            valid: true,
+            reason: "VALID_REQUIREMENTS"
+        };
+    }
+
+
+    /*
+     * A4.5
+     *
+     * Compares two requirement sets.
+     *
+     * Returns false if the higher-risk
+     * requirement set loses a protection.
+     */
+
+    compareRequirements(
+        lowerRequirements,
+        higherRequirements
+    ) {
+
+        const validationLow =
+            this.validateRequirementSet(
+                lowerRequirements
+            );
+
+        const validationHigh =
+            this.validateRequirementSet(
+                higherRequirements
+            );
+
+        if (
+            !validationLow.valid ||
+            !validationHigh.valid
+        ) {
+
+            return {
+                consistent: false,
+                reason: "INVALID_REQUIREMENT_SET"
+            };
+        }
+
+        const fields = [
+            "requiresConfirmation",
+            "requiresExplicitConfirmation",
+            "requiresAdditionalAuthentication",
+            "requiresAuditLog",
+            "requiresIsolation",
+            "requiresPreExecutionReview",
+            "requiresEmergencyProtection"
+        ];
+
+        for (
+            const field of fields
+        ) {
+
+            const lower =
+                this.getRequirementLevel(
+                    lowerRequirements[field]
+                );
+
+            const higher =
+                this.getRequirementLevel(
+                    higherRequirements[field]
+                );
+
+            if (
+                higher < lower
+            ) {
+
+                return {
+                    consistent: false,
+                    reason:
+                        `SECURITY_REGRESSION_${field.toUpperCase()}`,
+                    field
+                };
+            }
+        }
+
+        return {
+            consistent: true,
+            reason: "CONSISTENT"
+        };
+    }
+
+
+    /*
+     * A4.5
+     *
+     * Verifies that the complete
+     * LOW → MEDIUM → HIGH → CRITICAL
+     * security progression is monotonic.
+     */
+
+    validateRequirementMonotonicity() {
+
+        const levels = [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+        ];
+
+        const profiles = {};
+
+        const baseAction = {
+
+            actionType: "READ",
+
+            executionMode: "LOCAL",
+
+            duration: "SINGLE",
+
+            dataSensitivity: "PUBLIC",
+
+            externalEffect: "NONE",
+
+            reversibility: "REVERSIBLE",
+
+            userImpact: "LOW",
+
+            scope: "ONCE"
+        };
+
+        for (
+            const level of levels
+        ) {
+
+            profiles[level] =
+                this.getRequirements(
+                    level,
+                    baseAction
+                );
+        }
+
+        for (
+            let i = 0;
+            i < levels.length - 1;
+            i++
+        ) {
+
+            const lower =
+                levels[i];
+
+            const higher =
+                levels[i + 1];
+
+            const comparison =
+                this.compareRequirements(
+                    profiles[lower],
+                    profiles[higher]
+                );
+
+            if (
+                !comparison.consistent
+            ) {
+
+                return {
+                    valid: false,
+
+                    reason:
+                        comparison.reason,
+
+                    lower,
+
+                    higher,
+
+                    field:
+                        comparison.field ||
+                        null
+                };
+            }
+        }
+
+        return {
+            valid: true,
+            reason:
+                "REQUIREMENT_MONOTONICITY_VALID",
+            profiles
+        };
     }
 
 
@@ -616,6 +961,13 @@ export class RiskEngine {
                         criticalRequirements
                     ),
 
+                consistency:
+                    Object.freeze({
+                        valid: true,
+                        reason:
+                            "FAIL_CLOSED_CRITICAL"
+                    }),
+
                 evaluatedAt:
                     Date.now(),
 
@@ -657,6 +1009,66 @@ export class RiskEngine {
             );
 
 
+        /*
+         * A4.5 consistency validation
+         */
+
+        const requirementValidation =
+            this.validateRequirementSet(
+                requirements
+            );
+
+
+        /*
+         * If the engine generates an
+         * internally inconsistent security
+         * profile, fail closed.
+         */
+
+        if (
+            !requirementValidation.valid
+        ) {
+
+            return Object.freeze({
+
+                allowed: false,
+
+                action:
+                    action.name ||
+                    "UNKNOWN_ACTION",
+
+                riskScore:
+                    score,
+
+                baseRiskLevel:
+                    baseLevel,
+
+                riskLevel:
+                    "CRITICAL",
+
+                reason:
+                    "SECURITY_REQUIREMENT_INCONSISTENCY",
+
+                requirementError:
+                    requirementValidation.reason,
+
+                requirements:
+                    Object.freeze(
+                        this.getRequirements(
+                            "CRITICAL",
+                            action
+                        )
+                    ),
+
+                evaluatedAt:
+                    Date.now(),
+
+                engineVersion:
+                    this.version
+            });
+        }
+
+
         return Object.freeze({
 
             allowed: true,
@@ -687,6 +1099,13 @@ export class RiskEngine {
                 Object.freeze(
                     requirements
                 ),
+
+            consistency:
+                Object.freeze({
+                    valid: true,
+                    reason:
+                        "SECURITY_REQUIREMENTS_CONSISTENT"
+                }),
 
             evaluatedAt:
                 Date.now(),
