@@ -131,6 +131,10 @@
         background: #4d327d;
     }
 
+    .determinismTest {
+        background: #365f78;
+    }
+
     .stop {
         background: #6b1f27;
     }
@@ -192,7 +196,7 @@
     <h1>RAIVEN</h1>
 
     <div class="subtitle">
-        Security Core v0.1 — A4.6
+        Security Core v0.1 — A4.7
     </div>
 
 </header>
@@ -788,6 +792,101 @@
 
 
 <!-- ========================================= -->
+<!-- A4.7 -->
+<!-- ========================================= -->
+
+<div class="card">
+
+    <div class="section-title">
+        A4.7 Risk Decision Determinism
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Decision Determinism
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Repeat Evaluation
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Evaluation Purity
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Fail-Closed Determinism
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <button
+        id="a47DeterminismButton"
+        class="determinismTest"
+    >
+        TEST DECISION DETERMINISM
+    </button>
+
+
+    <button
+        id="a47PurityButton"
+        class="determinismTest"
+    >
+        TEST EVALUATION PURITY
+    </button>
+
+
+    <button
+        id="a47FailClosedButton"
+        class="determinismTest"
+    >
+        TEST A4.7 FAIL-CLOSED
+    </button>
+
+
+    <div
+        id="a47TestResult"
+        class="test-result"
+    ></div>
+
+</div>
+
+
+<!-- ========================================= -->
 <!-- EMERGENCY -->
 <!-- ========================================= -->
 
@@ -871,6 +970,12 @@ const consistencyTestResult =
 const integrityTestResult =
     document.getElementById(
         "integrityTestResult"
+    );
+
+
+const a47TestResult =
+    document.getElementById(
+        "a47TestResult"
     );
 
 
@@ -3225,6 +3330,412 @@ document.getElementById(
 
 
 /* ========================================= */
+/* A4.7 — DECISION DETERMINISM */
+/* ========================================= */
+
+document.getElementById(
+    "a47DeterminismButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "A47_DETERMINISM_TEST",
+
+            permission:
+                "CAMERA",
+
+            dataSensitivity:
+                "PRIVATE",
+
+            externalEffect:
+                "DEVICE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "MEDIUM",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const result =
+            riskEngine.validateDeterminism(
+                action,
+                10
+            );
+
+
+        const passed =
+            result.valid === true;
+
+
+        log(
+            "A4.7 Decision Determinism: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        a47TestResult.style.display =
+            "block";
+
+        a47TestResult.textContent =
+
+            "DECISION DETERMINISM\n\n" +
+
+            "Iterations: " +
+            (
+                result.iterations ??
+                "—"
+            ) +
+
+            "\nReason: " +
+            (
+                result.reason ||
+                "—"
+            ) +
+
+            "\n\nRESULT: " +
+
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.7 — EVALUATION PURITY */
+/* ========================================= */
+
+document.getElementById(
+    "a47PurityButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "A47_PURITY_TEST",
+
+            permission:
+                "CAMERA",
+
+            dataSensitivity:
+                "PRIVATE",
+
+            externalEffect:
+                "DEVICE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "LOW",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const before =
+            JSON.stringify(action);
+
+
+        const result =
+            riskEngine.validateEvaluationPurity(
+                action
+            );
+
+
+        const after =
+            JSON.stringify(action);
+
+
+        const unchanged =
+            before === after;
+
+
+        const passed =
+            result.valid === true
+            &&
+            unchanged;
+
+
+        log(
+            "A4.7 Evaluation Purity: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        a47TestResult.style.display =
+            "block";
+
+        a47TestResult.textContent =
+
+            "EVALUATION PURITY\n\n" +
+
+            "Input Mutated: " +
+            (
+                unchanged
+                    ? "NO"
+                    : "YES"
+            ) +
+
+            "\nReason: " +
+            (
+                result.reason ||
+                "—"
+            ) +
+
+            "\n\nRESULT: " +
+
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.7 — FAIL CLOSED */
+/* ========================================= */
+
+document.getElementById(
+    "a47FailClosedButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const invalidActions = [
+
+            null,
+
+            {
+                name:
+                    "A47_INVALID_SENSITIVITY",
+
+                permission:
+                    "NONE",
+
+                dataSensitivity:
+                    "INVALID",
+
+                externalEffect:
+                    "NONE",
+
+                reversibility:
+                    "REVERSIBLE",
+
+                userImpact:
+                    "LOW",
+
+                scope:
+                    "ONCE",
+
+                actionType:
+                    "READ",
+
+                executionMode:
+                    "LOCAL",
+
+                duration:
+                    "SINGLE"
+            },
+
+            {
+                name:
+                    "A47_INVALID_ACTION_TYPE",
+
+                permission:
+                    "NONE",
+
+                dataSensitivity:
+                    "PUBLIC",
+
+                externalEffect:
+                    "NONE",
+
+                reversibility:
+                    "REVERSIBLE",
+
+                userImpact:
+                    "LOW",
+
+                scope:
+                    "ONCE",
+
+                actionType:
+                    "INVALID",
+
+                executionMode:
+                    "LOCAL",
+
+                duration:
+                    "SINGLE"
+            }
+
+        ];
+
+
+        let allPassed = true;
+
+
+        a47TestResult.style.display =
+            "block";
+
+        a47TestResult.textContent =
+            "";
+
+
+        for (
+            const action of invalidActions
+        ) {
+
+            const result =
+                riskEngine.evaluate(
+                    action
+                );
+
+
+            const requirements =
+                result.requirements
+                || {};
+
+
+            const passed =
+
+                result.allowed === false
+
+                &&
+
+                result.riskLevel ===
+                "CRITICAL"
+
+                &&
+
+                requirements.requiresConfirmation ===
+                true
+
+                &&
+
+                requirements.requiresExplicitConfirmation ===
+                true
+
+                &&
+
+                requirements.requiresAdditionalAuthentication ===
+                true
+
+                &&
+
+                requirements.requiresAuditLog ===
+                true
+
+                &&
+
+                requirements.requiresIsolation ===
+                true
+
+                &&
+
+                requirements.requiresPreExecutionReview ===
+                true
+
+                &&
+
+                requirements.requiresEmergencyProtection ===
+                true;
+
+
+            if (!passed) {
+                allPassed = false;
+            }
+
+
+            const label =
+                action?.name ||
+                "NULL ACTION";
+
+
+            log(
+                "A4.7 Fail-Closed — " +
+                label +
+                ": " +
+                (
+                    passed
+                        ? "PASS"
+                        : "FAIL"
+                ),
+                passed
+            );
+
+
+            a47TestResult.textContent +=
+
+                label +
+                ": " +
+                (
+                    passed
+                        ? "PASS"
+                        : "FAIL"
+                ) +
+                "\n";
+        }
+
+
+        a47TestResult.textContent +=
+
+            "\nFINAL RESULT: " +
+
+            (
+                allPassed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
 /* PROTECTED ACTION */
 /* ========================================= */
 
@@ -3307,7 +3818,7 @@ document.getElementById(
 /* ========================================= */
 
 log(
-    "RAIVEN Risk Engine v0.6 initialized."
+    "RAIVEN Risk Engine v0.7 initialized."
 );
 
 evaluateCameraRisk();
