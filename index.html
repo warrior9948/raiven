@@ -177,7 +177,7 @@
         <h1>RAIVEN</h1>
 
         <div class="subtitle">
-            Security Core v0.1 — A4.3
+            Security Core v0.1 — A4.4
         </div>
 
     </header>
@@ -349,6 +349,130 @@
         </div>
 
 
+        <!-- ========================================= -->
+        <!-- A4.4 SECURITY REQUIREMENTS -->
+        <!-- ========================================= -->
+
+        <div
+            class="section-title"
+            style="margin-top: 15px;"
+        >
+            Security Requirements
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Confirmation
+            </span>
+
+            <span
+                id="requiresConfirmation"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Explicit Confirmation
+            </span>
+
+            <span
+                id="requiresExplicitConfirmation"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Additional Authentication
+            </span>
+
+            <span
+                id="requiresAuthentication"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Audit Log
+            </span>
+
+            <span
+                id="requiresAuditLog"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Isolation
+            </span>
+
+            <span
+                id="requiresIsolation"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Pre-Execution Review
+            </span>
+
+            <span
+                id="requiresPreExecutionReview"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Emergency Protection
+            </span>
+
+            <span
+                id="requiresEmergencyProtection"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
         <button
             id="allowButton"
             class="allow"
@@ -376,13 +500,13 @@
 
 
     <!-- ========================================= -->
-    <!-- A4.3 TEST PANEL -->
+    <!-- A4.4 TEST PANEL -->
     <!-- ========================================= -->
 
     <div class="card">
 
         <div class="section-title">
-            A4.3 Risk Context Tests
+            A4.4 Security Requirement Tests
         </div>
 
 
@@ -415,6 +539,19 @@
         <div class="row">
 
             <span>
+                Security Escalation
+            </span>
+
+            <span class="value">
+                ENABLED
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
                 Fail Closed
             </span>
 
@@ -424,6 +561,8 @@
 
         </div>
 
+
+        <!-- A4.3 compatibility tests -->
 
         <button
             id="riskFloorTestButton"
@@ -446,6 +585,32 @@
             class="riskTest"
         >
             TEST INVALID CONTEXT
+        </button>
+
+
+        <!-- A4.4 tests -->
+
+        <button
+            id="securityRequirementsTestButton"
+            class="riskTest"
+        >
+            TEST SECURITY REQUIREMENTS
+        </button>
+
+
+        <button
+            id="criticalRequirementsTestButton"
+            class="riskTest"
+        >
+            TEST CRITICAL REQUIREMENTS
+        </button>
+
+
+        <button
+            id="contextEscalationTestButton"
+            class="riskTest"
+        >
+            TEST CONTEXT ESCALATION
         </button>
 
 
@@ -671,6 +836,48 @@
         );
 
 
+    const requiresConfirmation =
+        document.getElementById(
+            "requiresConfirmation"
+        );
+
+
+    const requiresExplicitConfirmation =
+        document.getElementById(
+            "requiresExplicitConfirmation"
+        );
+
+
+    const requiresAuthentication =
+        document.getElementById(
+            "requiresAuthentication"
+        );
+
+
+    const requiresAuditLog =
+        document.getElementById(
+            "requiresAuditLog"
+        );
+
+
+    const requiresIsolation =
+        document.getElementById(
+            "requiresIsolation"
+        );
+
+
+    const requiresPreExecutionReview =
+        document.getElementById(
+            "requiresPreExecutionReview"
+        );
+
+
+    const requiresEmergencyProtection =
+        document.getElementById(
+            "requiresEmergencyProtection"
+        );
+
+
     const allowButton =
         document.getElementById(
             "allowButton"
@@ -704,6 +911,24 @@
     const invalidTestButton =
         document.getElementById(
             "invalidTestButton"
+        );
+
+
+    const securityRequirementsTestButton =
+        document.getElementById(
+            "securityRequirementsTestButton"
+        );
+
+
+    const criticalRequirementsTestButton =
+        document.getElementById(
+            "criticalRequirementsTestButton"
+        );
+
+
+    const contextEscalationTestButton =
+        document.getElementById(
+            "contextEscalationTestButton"
         );
 
 
@@ -783,7 +1008,7 @@
 
 
     // ==================================================
-    // DISPLAY RISK
+    // DISPLAY RISK + SECURITY REQUIREMENTS
     // ==================================================
 
     function displayRisk(evaluation) {
@@ -820,6 +1045,34 @@
 
             durationElement.textContent =
                 "INVALID";
+
+
+            requiresConfirmation.textContent =
+                "TRUE";
+
+
+            requiresExplicitConfirmation.textContent =
+                "TRUE";
+
+
+            requiresAuthentication.textContent =
+                "TRUE";
+
+
+            requiresAuditLog.textContent =
+                "TRUE";
+
+
+            requiresIsolation.textContent =
+                "TRUE";
+
+
+            requiresPreExecutionReview.textContent =
+                "TRUE";
+
+
+            requiresEmergencyProtection.textContent =
+                "TRUE";
 
 
             return;
@@ -861,6 +1114,52 @@
                 "UNKNOWN";
 
         }
+
+
+        const requirements =
+            evaluation.requirements;
+
+
+        requiresConfirmation.textContent =
+            requirements.requiresConfirmation
+                ? "TRUE"
+                : "FALSE";
+
+
+        requiresExplicitConfirmation.textContent =
+            requirements.requiresExplicitConfirmation
+                ? "TRUE"
+                : "FALSE";
+
+
+        requiresAuthentication.textContent =
+            requirements.requiresAdditionalAuthentication
+                ? "TRUE"
+                : "FALSE";
+
+
+        requiresAuditLog.textContent =
+            requirements.requiresAuditLog
+                ? "TRUE"
+                : "FALSE";
+
+
+        requiresIsolation.textContent =
+            requirements.requiresIsolation
+                ? "TRUE"
+                : "FALSE";
+
+
+        requiresPreExecutionReview.textContent =
+            requirements.requiresPreExecutionReview
+                ? "TRUE"
+                : "FALSE";
+
+
+        requiresEmergencyProtection.textContent =
+            requirements.requiresEmergencyProtection
+                ? "TRUE"
+                : "FALSE";
 
     }
 
@@ -949,6 +1248,33 @@
             `Audit log required: ` +
 
             `${evaluation.requirements.requiresAuditLog}`
+
+        );
+
+
+        securityLog(
+
+            `Isolation required: ` +
+
+            `${evaluation.requirements.requiresIsolation}`
+
+        );
+
+
+        securityLog(
+
+            `Pre-execution review required: ` +
+
+            `${evaluation.requirements.requiresPreExecutionReview}`
+
+        );
+
+
+        securityLog(
+
+            `Emergency protection required: ` +
+
+            `${evaluation.requirements.requiresEmergencyProtection}`
 
         );
 
@@ -1892,6 +2218,634 @@
 
 
     // ==================================================
+    // A4.4 SECURITY REQUIREMENT TEST
+    // ==================================================
+
+    function testSecurityRequirements() {
+
+        securityLog(
+            "A4.4 security requirement test started."
+        );
+
+
+        const tests = [
+
+            {
+
+                name:
+                    "LOW READ",
+
+                action: {
+
+                    name:
+                        "LOW_READ",
+
+                    permission:
+                        "NONE",
+
+                    dataSensitivity:
+                        "PUBLIC",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "READ",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+
+                },
+
+                expected: {
+
+                    confirmation:
+                        false,
+
+                    explicit:
+                        false,
+
+                    authentication:
+                        false,
+
+                    audit:
+                        true
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "MEDIUM WRITE",
+
+                action: {
+
+                    name:
+                        "MEDIUM_WRITE",
+
+                    permission:
+                        "STORAGE",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "WRITE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+
+                },
+
+                expected: {
+
+                    confirmation:
+                        true,
+
+                    explicit:
+                        false,
+
+                    authentication:
+                        false,
+
+                    audit:
+                        true
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "HIGH CAPTURE",
+
+                action: {
+
+                    name:
+                        "HIGH_CAPTURE",
+
+                    permission:
+                        "CAMERA",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "CAPTURE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+
+                },
+
+                expected: {
+
+                    confirmation:
+                        true,
+
+                    explicit:
+                        true,
+
+                    authentication:
+                        false,
+
+                    audit:
+                        true
+
+                }
+
+            }
+
+        ];
+
+
+        let passed = 0;
+
+        const results = [];
+
+
+        for (
+            const test of tests
+        ) {
+
+            const evaluation =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const r =
+                evaluation.requirements;
+
+
+            const pass =
+
+                evaluation.allowed === true &&
+
+                r.requiresConfirmation ===
+                    test.expected.confirmation &&
+
+                r.requiresExplicitConfirmation ===
+                    test.expected.explicit &&
+
+                r.requiresAdditionalAuthentication ===
+                    test.expected.authentication &&
+
+                r.requiresAuditLog ===
+                    test.expected.audit;
+
+
+            if (pass) {
+
+                passed++;
+
+            }
+
+
+            results.push(
+
+                `${pass ? "PASS" : "FAIL"} — ${test.name}\n` +
+
+                `Risk: ${evaluation.riskLevel}\n` +
+
+                `Confirmation: ${r.requiresConfirmation}\n` +
+
+                `Explicit: ${r.requiresExplicitConfirmation}\n` +
+
+                `Authentication: ${r.requiresAdditionalAuthentication}\n` +
+
+                `Audit: ${r.requiresAuditLog}\n`
+
+            );
+
+        }
+
+
+        const allPassed =
+            passed === tests.length;
+
+
+        results.unshift(
+
+            allPassed
+
+                ? "A4.4 SECURITY REQUIREMENT TEST: ALL PASS\n"
+
+                : "A4.4 SECURITY REQUIREMENT TEST: FAILURE\n"
+
+        );
+
+
+        riskTestResult.style.display =
+            "block";
+
+
+        riskTestResult.textContent =
+            results.join("\n");
+
+
+        securityLog(
+
+            allPassed
+
+                ? "A4.4 security requirement test: ALL PASS."
+
+                : "A4.4 security requirement test: FAILURE."
+
+        );
+
+    }
+
+
+    // ==================================================
+    // A4.4 CRITICAL REQUIREMENTS TEST
+    // ==================================================
+
+    function testCriticalRequirements() {
+
+        securityLog(
+            "A4.4 critical requirement test started."
+        );
+
+
+        const action = {
+
+            name:
+                "CRITICAL_REMOTE_EXECUTION",
+
+            permission:
+                "REMOTE_EXECUTION",
+
+            dataSensitivity:
+                "SENSITIVE",
+
+            externalEffect:
+                "NETWORK",
+
+            reversibility:
+                "IRREVERSIBLE",
+
+            userImpact:
+                "HIGH",
+
+            scope:
+                "PERSISTENT",
+
+            actionType:
+                "EXECUTE",
+
+            executionMode:
+                "REMOTE",
+
+            duration:
+                "SINGLE"
+
+        };
+
+
+        const evaluation =
+            riskEngine.evaluate(
+                action
+            );
+
+
+        const r =
+            evaluation.requirements;
+
+
+        const passed =
+
+            evaluation.riskLevel ===
+                "CRITICAL" &&
+
+            r.requiresConfirmation === true &&
+
+            r.requiresExplicitConfirmation === true &&
+
+            r.requiresAdditionalAuthentication === true &&
+
+            r.requiresAuditLog === true &&
+
+            r.requiresIsolation === true &&
+
+            r.requiresPreExecutionReview === true &&
+
+            r.requiresEmergencyProtection === true;
+
+
+        riskTestResult.style.display =
+            "block";
+
+
+        riskTestResult.textContent =
+
+            `${passed ? "PASS" : "FAIL"} — Critical Requirements\n\n` +
+
+            `Risk: ${evaluation.riskLevel}\n` +
+
+            `Confirmation: ${r.requiresConfirmation}\n` +
+
+            `Explicit Confirmation: ${r.requiresExplicitConfirmation}\n` +
+
+            `Authentication: ${r.requiresAdditionalAuthentication}\n` +
+
+            `Audit Log: ${r.requiresAuditLog}\n` +
+
+            `Isolation: ${r.requiresIsolation}\n` +
+
+            `Pre-Execution Review: ${r.requiresPreExecutionReview}\n` +
+
+            `Emergency Protection: ${r.requiresEmergencyProtection}`;
+
+
+        securityLog(
+
+            `${passed ? "PASS" : "FAIL"}: ` +
+
+            "A4.4 critical requirements"
+
+        );
+
+    }
+
+
+    // ==================================================
+    // A4.4 CONTEXT ESCALATION TEST
+    // ==================================================
+
+    function testContextEscalation() {
+
+        securityLog(
+            "A4.4 context escalation test started."
+        );
+
+
+        const tests = [
+
+            {
+
+                name:
+                    "REMOTE TRANSMISSION",
+
+                action: {
+
+                    name:
+                        "REMOTE_TRANSMISSION",
+
+                    permission:
+                        "NETWORK",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "TRANSMIT",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "REMOTE EXECUTION",
+
+                action: {
+
+                    name:
+                        "REMOTE_EXECUTION",
+
+                    permission:
+                        "EXECUTE",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "HIGH",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "EXECUTE",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "CONTINUOUS SENSITIVE",
+
+                action: {
+
+                    name:
+                        "CONTINUOUS_SENSITIVE",
+
+                    permission:
+                        "CAMERA",
+
+                    dataSensitivity:
+                        "SENSITIVE",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "HIGH",
+
+                    scope:
+                        "SESSION",
+
+                    actionType:
+                        "CAPTURE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "CONTINUOUS"
+
+                }
+
+            }
+
+        ];
+
+
+        let passed = 0;
+
+        const results = [];
+
+
+        for (
+            const test of tests
+        ) {
+
+            const evaluation =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const r =
+                evaluation.requirements;
+
+
+            const pass =
+
+                evaluation.allowed === true &&
+
+                r.requiresExplicitConfirmation === true &&
+
+                r.requiresPreExecutionReview === true;
+
+
+            if (pass) {
+
+                passed++;
+
+            }
+
+
+            results.push(
+
+                `${pass ? "PASS" : "FAIL"} — ${test.name}\n` +
+
+                `Risk: ${evaluation.riskLevel}\n` +
+
+                `Explicit Confirmation: ${r.requiresExplicitConfirmation}\n` +
+
+                `Pre-Execution Review: ${r.requiresPreExecutionReview}\n` +
+
+                `Isolation: ${r.requiresIsolation}\n`
+
+            );
+
+        }
+
+
+        const allPassed =
+            passed === tests.length;
+
+
+        results.unshift(
+
+            allPassed
+
+                ? "A4.4 CONTEXT ESCALATION TEST: ALL PASS\n"
+
+                : "A4.4 CONTEXT ESCALATION TEST: FAILURE\n"
+
+        );
+
+
+        riskTestResult.style.display =
+            "block";
+
+
+        riskTestResult.textContent =
+            results.join("\n");
+
+
+        securityLog(
+
+            allPassed
+
+                ? "A4.4 context escalation test: ALL PASS."
+
+                : "A4.4 context escalation test: FAILURE."
+
+        );
+
+    }
+
+
+    // ==================================================
     // EMERGENCY STOP
     // ==================================================
 
@@ -1964,6 +2918,24 @@
     );
 
 
+    securityRequirementsTestButton.addEventListener(
+        "click",
+        testSecurityRequirements
+    );
+
+
+    criticalRequirementsTestButton.addEventListener(
+        "click",
+        testCriticalRequirements
+    );
+
+
+    contextEscalationTestButton.addEventListener(
+        "click",
+        testContextEscalation
+    );
+
+
     stopButton.addEventListener(
         "click",
         emergencyStop
@@ -1990,7 +2962,7 @@
 
 
     securityLog(
-        "Risk Engine v0.3 initialized."
+        "Risk Engine v0.4 initialized."
     );
 
 
