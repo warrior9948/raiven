@@ -127,6 +127,10 @@
         background: #72552f;
     }
 
+    .integrityTest {
+        background: #4d327d;
+    }
+
     .stop {
         background: #6b1f27;
     }
@@ -183,24 +187,16 @@
 <div class="container">
 
 
-<!-- ========================================= -->
-<!-- HEADER -->
-<!-- ========================================= -->
-
 <header>
 
     <h1>RAIVEN</h1>
 
     <div class="subtitle">
-        Security Core v0.1 — A4.5
+        Security Core v0.1 — A4.6
     </div>
 
 </header>
 
-
-<!-- ========================================= -->
-<!-- SECURITY STATUS -->
-<!-- ========================================= -->
 
 <div class="card security-status">
 
@@ -364,6 +360,38 @@
     </div>
 
 
+    <div class="row">
+
+        <span>
+            Decision ID
+        </span>
+
+        <span
+            id="decisionId"
+            class="value"
+        >
+            —
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Integrity
+        </span>
+
+        <span
+            id="integrityStatus"
+            class="value"
+        >
+            —
+        </span>
+
+    </div>
+
+
     <button
         id="allowButton"
         class="allow"
@@ -391,7 +419,7 @@
 
 
 <!-- ========================================= -->
-<!-- A4.3 TEST PANEL -->
+<!-- A4.3 -->
 <!-- ========================================= -->
 
 <div class="card">
@@ -473,7 +501,7 @@
 
 
 <!-- ========================================= -->
-<!-- A4.4 SECURITY REQUIREMENTS -->
+<!-- A4.4 -->
 <!-- ========================================= -->
 
 <div class="card">
@@ -484,114 +512,65 @@
 
 
     <div class="row">
-
-        <span>
-            Confirmation
-        </span>
-
+        <span>Confirmation</span>
         <span
             id="confirmationRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Explicit Confirmation
-        </span>
-
+        <span>Explicit Confirmation</span>
         <span
             id="explicitConfirmationRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Additional Authentication
-        </span>
-
+        <span>Additional Authentication</span>
         <span
             id="authenticationRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Audit Log
-        </span>
-
+        <span>Audit Log</span>
         <span
             id="auditRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Isolation
-        </span>
-
+        <span>Isolation</span>
         <span
             id="isolationRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Pre-Execution Review
-        </span>
-
+        <span>Pre-Execution Review</span>
         <span
             id="preExecutionRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Emergency Protection
-        </span>
-
+        <span>Emergency Protection</span>
         <span
             id="emergencyRequirement"
             class="value"
-        >
-            —
-        </span>
-
+        >—</span>
     </div>
 
 
@@ -628,7 +607,7 @@
 
 
 <!-- ========================================= -->
-<!-- A4.5 RISK DECISION CONSISTENCY -->
+<!-- A4.5 -->
 <!-- ========================================= -->
 
 <div class="card">
@@ -639,50 +618,29 @@
 
 
     <div class="row">
-
-        <span>
-            Requirement Validation
-        </span>
-
+        <span>Requirement Validation</span>
         <span
             id="requirementValidationStatus"
             class="value"
-        >
-            ENABLED
-        </span>
-
+        >ENABLED</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Monotonicity Check
-        </span>
-
+        <span>Monotonicity Check</span>
         <span
             id="monotonicityStatus"
             class="value"
-        >
-            ENABLED
-        </span>
-
+        >ENABLED</span>
     </div>
 
 
     <div class="row">
-
-        <span>
-            Fail-Closed Consistency
-        </span>
-
+        <span>Fail-Closed Consistency</span>
         <span
             id="failClosedConsistencyStatus"
             class="value"
-        >
-            ENABLED
-        </span>
-
+        >ENABLED</span>
     </div>
 
 
@@ -727,7 +685,110 @@
 
 
 <!-- ========================================= -->
-<!-- EMERGENCY CONTROL -->
+<!-- A4.6 -->
+<!-- ========================================= -->
+
+<div class="card">
+
+    <div class="section-title">
+        A4.6 Risk Decision Integrity
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Decision ID
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Decision Fingerprint
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Tamper Detection
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span>
+            Fail-Closed Integrity
+        </span>
+
+        <span class="value">
+            ENABLED
+        </span>
+
+    </div>
+
+
+    <button
+        id="integrityCreationButton"
+        class="integrityTest"
+    >
+        TEST INTEGRITY CREATION
+    </button>
+
+
+    <button
+        id="integrityVerificationButton"
+        class="integrityTest"
+    >
+        TEST INTEGRITY VERIFICATION
+    </button>
+
+
+    <button
+        id="tamperDetectionButton"
+        class="integrityTest"
+    >
+        TEST TAMPER DETECTION
+    </button>
+
+
+    <button
+        id="integrityFailClosedButton"
+        class="integrityTest"
+    >
+        TEST INTEGRITY FAIL-CLOSED
+    </button>
+
+
+    <div
+        id="integrityTestResult"
+        class="test-result"
+    ></div>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- EMERGENCY -->
 <!-- ========================================= -->
 
 <div class="card">
@@ -746,10 +807,6 @@
 
 </div>
 
-
-<!-- ========================================= -->
-<!-- RESULT -->
-<!-- ========================================= -->
 
 <div id="result"></div>
 
@@ -777,10 +834,6 @@
 </div>
 
 
-<!-- ========================================= -->
-<!-- JAVASCRIPT -->
-<!-- ========================================= -->
-
 <script type="module">
 
 import {
@@ -798,17 +851,30 @@ const logElement =
 
 
 const riskTestResult =
-    document.getElementById("riskTestResult");
+    document.getElementById(
+        "riskTestResult"
+    );
 
 
 const securityTestResult =
-    document.getElementById("securityTestResult");
+    document.getElementById(
+        "securityTestResult"
+    );
 
 
 const consistencyTestResult =
     document.getElementById(
         "consistencyTestResult"
     );
+
+
+const integrityTestResult =
+    document.getElementById(
+        "integrityTestResult"
+    );
+
+
+let lastDecision = null;
 
 
 function log(message, status = null) {
@@ -831,24 +897,6 @@ function log(message, status = null) {
 
     logElement.scrollTop =
         logElement.scrollHeight;
-}
-
-
-function showTestResult(
-    element,
-    message,
-    passed
-) {
-
-    element.style.display =
-        "block";
-
-    element.textContent =
-        message;
-
-    element.className =
-        "test-result " +
-        (passed ? "pass" : "fail");
 }
 
 
@@ -894,6 +942,21 @@ function displayRisk(evaluation) {
     ).textContent =
         evaluation.riskScore
         ?? "—";
+
+
+    document.getElementById(
+        "decisionId"
+    ).textContent =
+        evaluation.decisionId
+        || "—";
+
+
+    document.getElementById(
+        "integrityStatus"
+    ).textContent =
+        evaluation.integrity?.valid === true
+            ? "VALID"
+            : "NOT VERIFIED";
 
 
     const requirements =
@@ -997,6 +1060,9 @@ function evaluateCameraRisk() {
         );
 
 
+    lastDecision = result;
+
+
     displayRisk(result);
 
 
@@ -1005,9 +1071,20 @@ function evaluateCameraRisk() {
         result.riskLevel
     );
 
+
     log(
         "Camera Score: " +
         result.riskScore
+    );
+
+
+    log(
+        "Decision Integrity: " +
+        (
+            result.integrity?.valid
+                ? "VALID"
+                : "INVALID"
+        )
     );
 }
 
@@ -1200,9 +1277,11 @@ document.getElementById(
 
         riskTestResult.textContent +=
             "\nRESULT: " +
-            (allPassed
-                ? "ALL TESTS PASSED"
-                : "TEST FAILURE");
+            (
+                allPassed
+                    ? "ALL TESTS PASSED"
+                    : "TEST FAILURE"
+            );
 
     }
 );
@@ -1281,9 +1360,11 @@ document.getElementById(
 
         log(
             "Action Context: " +
-            (passed
-                ? "PASS"
-                : "FAIL"),
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
             passed
         );
 
@@ -1296,9 +1377,11 @@ document.getElementById(
 
         riskTestResult.textContent =
             "ACTION CONTEXT TEST: " +
-            (passed
-                ? "PASS"
-                : "FAIL");
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
     }
 );
 
@@ -1365,9 +1448,11 @@ document.getElementById(
 
         log(
             "Invalid Context: " +
-            (passed
-                ? "PASS"
-                : "FAIL"),
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
             passed
         );
 
@@ -1377,9 +1462,11 @@ document.getElementById(
 
         riskTestResult.textContent =
             "INVALID CONTEXT TEST: " +
-            (passed
-                ? "PASS"
-                : "FAIL");
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
     }
 );
 
@@ -1768,9 +1855,11 @@ document.getElementById(
 
         log(
             "Critical Requirements: " +
-            (passed
-                ? "PASS"
-                : "FAIL"),
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
             passed
         );
 
@@ -2233,21 +2322,24 @@ document.getElementById(
         }
 
 
-        const validLine =
-            "VALID REQUIREMENT SET: " +
-            (validPassed
-                ? "PASS"
-                : "FAIL");
-
-
         log(
-            validLine,
+            "VALID REQUIREMENT SET: " +
+            (
+                validPassed
+                    ? "PASS"
+                    : "FAIL"
+            ),
             validPassed
         );
 
 
         consistencyTestResult.textContent +=
-            validLine + "\n";
+            "VALID REQUIREMENT SET: " +
+            (
+                validPassed
+                    ? "PASS"
+                    : "FAIL"
+            ) + "\n";
 
 
         for (
@@ -2275,23 +2367,16 @@ document.getElementById(
             }
 
 
-            const line =
-                `${test.name}: ` +
-                `${passed ? "PASS" : "FAIL"}\n` +
-
-                `Detected: ${
-                    result.reason
-                }`;
-
-
             log(
-                line,
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}`,
                 passed
             );
 
 
             consistencyTestResult.textContent +=
-                line + "\n";
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}\n`;
         }
 
 
@@ -2356,22 +2441,12 @@ document.getElementById(
                     ? "ALL TESTS PASSED"
                     : "TEST FAILURE"
             );
-
-
-        if (
-            !passed
-        ) {
-
-            consistencyTestResult.textContent +=
-                "\n\nReason: " +
-                result.reason;
-        }
     }
 );
 
 
 /* ========================================= */
-/* A4.5 — REQUIREMENT COMPARISON */
+/* A4.5 — COMPARISON */
 /* ========================================= */
 
 document.getElementById(
@@ -2380,99 +2455,59 @@ document.getElementById(
     "click",
     () => {
 
+        const baseAction = {
+
+            actionType:
+                "READ",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE",
+
+            dataSensitivity:
+                "PUBLIC",
+
+            externalEffect:
+                "NONE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "LOW",
+
+            scope:
+                "ONCE"
+        };
+
+
         const low =
             riskEngine.getRequirements(
                 "LOW",
-                {
-                    actionType:
-                        "READ",
-                    executionMode:
-                        "LOCAL",
-                    duration:
-                        "SINGLE",
-                    dataSensitivity:
-                        "PUBLIC",
-                    externalEffect:
-                        "NONE",
-                    reversibility:
-                        "REVERSIBLE",
-                    userImpact:
-                        "LOW",
-                    scope:
-                        "ONCE"
-                }
+                baseAction
             );
 
 
         const medium =
             riskEngine.getRequirements(
                 "MEDIUM",
-                {
-                    actionType:
-                        "READ",
-                    executionMode:
-                        "LOCAL",
-                    duration:
-                        "SINGLE",
-                    dataSensitivity:
-                        "PUBLIC",
-                    externalEffect:
-                        "NONE",
-                    reversibility:
-                        "REVERSIBLE",
-                    userImpact:
-                        "LOW",
-                    scope:
-                        "ONCE"
-                }
+                baseAction
             );
 
 
         const high =
             riskEngine.getRequirements(
                 "HIGH",
-                {
-                    actionType:
-                        "READ",
-                    executionMode:
-                        "LOCAL",
-                    duration:
-                        "SINGLE",
-                    dataSensitivity:
-                        "PUBLIC",
-                    externalEffect:
-                        "NONE",
-                    reversibility:
-                        "REVERSIBLE",
-                    userImpact:
-                        "LOW",
-                    scope:
-                        "ONCE"
-                }
+                baseAction
             );
 
 
         const critical =
             riskEngine.getRequirements(
                 "CRITICAL",
-                {
-                    actionType:
-                        "READ",
-                    executionMode:
-                        "LOCAL",
-                    duration:
-                        "SINGLE",
-                    dataSensitivity:
-                        "PUBLIC",
-                    externalEffect:
-                        "NONE",
-                    reversibility:
-                        "REVERSIBLE",
-                    userImpact:
-                        "LOW",
-                    scope:
-                        "ONCE"
-                }
+                baseAction
             );
 
 
@@ -2525,8 +2560,6 @@ document.getElementById(
             "block";
 
         consistencyTestResult.textContent =
-
-            "REQUIREMENT COMPARISON\n\n" +
 
             "LOW → MEDIUM: " +
             (
@@ -2737,24 +2770,16 @@ document.getElementById(
             }
 
 
-            const line =
-
-                `${test.name}: ` +
-                `${passed ? "PASS" : "FAIL"}\n` +
-
-                `Risk: ${result.riskLevel}\n` +
-
-                `Allowed: ${result.allowed}\n`;
-
-
             log(
-                line,
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}`,
                 passed
             );
 
 
             consistencyTestResult.textContent +=
-                line + "\n";
+                `${test.name}: ` +
+                `${passed ? "PASS" : "FAIL"}\n`;
         }
 
 
@@ -2764,6 +2789,436 @@ document.getElementById(
                 allPassed
                     ? "ALL TESTS PASSED"
                     : "TEST FAILURE"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.6 — INTEGRITY CREATION */
+/* ========================================= */
+
+document.getElementById(
+    "integrityCreationButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "A46_INTEGRITY_CREATION",
+
+            permission:
+                "CAMERA",
+
+            dataSensitivity:
+                "PRIVATE",
+
+            externalEffect:
+                "DEVICE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "MEDIUM",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const decision =
+            riskEngine.evaluate(
+                action
+            );
+
+
+        const passed =
+
+            !!decision.decisionId
+
+            &&
+
+            !!decision.integrity
+
+            &&
+
+            !!decision.integrity.fingerprint
+
+            &&
+
+            decision.integrity.valid === true;
+
+
+        if (passed) {
+            lastDecision = decision;
+        }
+
+
+        log(
+            "A4.6 Integrity Creation: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        integrityTestResult.style.display =
+            "block";
+
+        integrityTestResult.textContent =
+
+            "INTEGRITY CREATION\n\n" +
+
+            "Decision ID: " +
+            (
+                decision.decisionId ||
+                "MISSING"
+            ) +
+
+            "\nFingerprint: " +
+
+            (
+                decision.integrity?.fingerprint ||
+                "MISSING"
+            ) +
+
+            "\nIntegrity Flag: " +
+
+            (
+                decision.integrity?.valid ??
+                false
+            ) +
+
+            "\n\nRESULT: " +
+
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.6 — INTEGRITY VERIFICATION */
+/* ========================================= */
+
+document.getElementById(
+    "integrityVerificationButton"
+).addEventListener(
+    "click",
+    () => {
+
+        if (!lastDecision) {
+            evaluateCameraRisk();
+        }
+
+
+        const verification =
+            riskEngine.verifyDecisionIntegrity(
+                lastDecision
+            );
+
+
+        const passed =
+            verification.valid === true;
+
+
+        log(
+            "A4.6 Integrity Verification: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        integrityTestResult.style.display =
+            "block";
+
+        integrityTestResult.textContent =
+
+            "INTEGRITY VERIFICATION\n\n" +
+
+            "Decision ID: " +
+            (
+                verification.decisionId ||
+                "—"
+            ) +
+
+            "\nFingerprint: " +
+
+            (
+                verification.fingerprint ||
+                "—"
+            ) +
+
+            "\nReason: " +
+
+            verification.reason +
+
+            "\n\nRESULT: " +
+
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.6 — TAMPER DETECTION */
+/* ========================================= */
+
+document.getElementById(
+    "tamperDetectionButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "A46_TAMPER_TEST",
+
+            permission:
+                "CAMERA",
+
+            dataSensitivity:
+                "PRIVATE",
+
+            externalEffect:
+                "DEVICE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "MEDIUM",
+
+            scope:
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "LOCAL",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const original =
+            riskEngine.evaluate(
+                action
+            );
+
+
+        const tampered =
+            {
+
+                ...original,
+
+                riskScore:
+                    (original.riskScore ?? 0) + 1
+            };
+
+
+        const verification =
+            riskEngine.verifyDecisionIntegrity(
+                tampered
+            );
+
+
+        const passed =
+
+            verification.valid === false
+
+            &&
+
+            verification.reason ===
+            "DECISION_TAMPER_DETECTED";
+
+
+        log(
+            "A4.6 Tamper Detection: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        integrityTestResult.style.display =
+            "block";
+
+        integrityTestResult.textContent =
+
+            "TAMPER DETECTION\n\n" +
+
+            "Original Fingerprint: " +
+
+            original.integrity.fingerprint +
+
+            "\nModified Risk Score: " +
+
+            tampered.riskScore +
+
+            "\nVerification: " +
+
+            verification.reason +
+
+            "\n\nRESULT: " +
+
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            );
+    }
+);
+
+
+/* ========================================= */
+/* A4.6 — INTEGRITY FAIL CLOSED */
+/* ========================================= */
+
+document.getElementById(
+    "integrityFailClosedButton"
+).addEventListener(
+    "click",
+    () => {
+
+        const action = {
+
+            name:
+                "A46_FAIL_CLOSED",
+
+            permission:
+                "SYSTEM",
+
+            dataSensitivity:
+                "SENSITIVE",
+
+            externalEffect:
+                "NETWORK",
+
+            reversibility:
+                "IRREVERSIBLE",
+
+            userImpact:
+                "HIGH",
+
+            scope:
+                "PERSISTENT",
+
+            actionType:
+                "EXECUTE",
+
+            executionMode:
+                "REMOTE",
+
+            duration:
+                "SINGLE"
+        };
+
+
+        const decision =
+            riskEngine.evaluate(
+                action
+            );
+
+
+        const tampered =
+            {
+
+                ...decision,
+
+                riskLevel:
+                    "LOW"
+            };
+
+
+        const enforcement =
+            riskEngine.enforceDecisionIntegrity(
+                tampered
+            );
+
+
+        const passed =
+
+            enforcement.allowed === false
+
+            &&
+
+            enforcement.trusted === false
+
+            &&
+
+            enforcement.reason ===
+            "DECISION_INTEGRITY_FAILURE";
+
+
+        log(
+            "A4.6 Integrity Fail-Closed: " +
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
+            ),
+            passed
+        );
+
+
+        integrityTestResult.style.display =
+            "block";
+
+        integrityTestResult.textContent =
+
+            "INTEGRITY FAIL-CLOSED\n\n" +
+
+            "Trusted: " +
+
+            enforcement.trusted +
+
+            "\nAllowed: " +
+
+            enforcement.allowed +
+
+            "\nReason: " +
+
+            enforcement.reason +
+
+            "\n\nRESULT: " +
+
+            (
+                passed
+                    ? "PASS"
+                    : "FAIL"
             );
     }
 );
@@ -2852,7 +3307,7 @@ document.getElementById(
 /* ========================================= */
 
 log(
-    "RAIVEN Risk Engine v0.5 initialized."
+    "RAIVEN Risk Engine v0.6 initialized."
 );
 
 evaluateCameraRisk();
