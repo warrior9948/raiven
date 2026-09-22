@@ -177,7 +177,7 @@
         <h1>RAIVEN</h1>
 
         <div class="subtitle">
-            Security Core v0.1
+            Security Core v0.1 — A4.3
         </div>
 
     </header>
@@ -235,6 +235,54 @@
 
             <span class="value">
                 CAMERA
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Action Type
+            </span>
+
+            <span
+                id="actionType"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Execution
+            </span>
+
+            <span
+                id="executionMode"
+                class="value"
+            >
+                —
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Duration
+            </span>
+
+            <span
+                id="duration"
+                class="value"
+            >
+                —
             </span>
 
         </div>
@@ -328,13 +376,26 @@
 
 
     <!-- ========================================= -->
-    <!-- A4.2 TEST PANEL -->
+    <!-- A4.3 TEST PANEL -->
     <!-- ========================================= -->
 
     <div class="card">
 
         <div class="section-title">
-            A4.2 Risk Security Tests
+            A4.3 Risk Context Tests
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Context Validation
+            </span>
+
+            <span class="value">
+                ENABLED
+            </span>
+
         </div>
 
 
@@ -373,10 +434,18 @@
 
 
         <button
+            id="contextTestButton"
+            class="riskTest"
+        >
+            TEST ACTION CONTEXT
+        </button>
+
+
+        <button
             id="invalidTestButton"
             class="riskTest"
         >
-            TEST INVALID ACTION
+            TEST INVALID CONTEXT
         </button>
 
 
@@ -566,6 +635,24 @@
         );
 
 
+    const actionTypeElement =
+        document.getElementById(
+            "actionType"
+        );
+
+
+    const executionModeElement =
+        document.getElementById(
+            "executionMode"
+        );
+
+
+    const durationElement =
+        document.getElementById(
+            "duration"
+        );
+
+
     const baseRiskLevel =
         document.getElementById(
             "baseRiskLevel"
@@ -605,6 +692,12 @@
     const riskFloorTestButton =
         document.getElementById(
             "riskFloorTestButton"
+        );
+
+
+    const contextTestButton =
+        document.getElementById(
+            "contextTestButton"
         );
 
 
@@ -651,7 +744,7 @@
 
 
     // ==================================================
-    // CAMERA ACTION DEFINITION
+    // CAMERA ACTION
     // ==================================================
 
     const cameraAction = {
@@ -675,7 +768,16 @@
             "MEDIUM",
 
         scope:
-            "ONCE"
+            "ONCE",
+
+        actionType:
+            "CAPTURE",
+
+        executionMode:
+            "LOCAL",
+
+        duration:
+            "SINGLE"
 
     };
 
@@ -708,6 +810,18 @@
                 "INVALID";
 
 
+            actionTypeElement.textContent =
+                "INVALID";
+
+
+            executionModeElement.textContent =
+                "INVALID";
+
+
+            durationElement.textContent =
+                "INVALID";
+
+
             return;
 
         }
@@ -726,6 +840,27 @@
         riskScore.textContent =
             evaluation.riskScore ??
             "—";
+
+
+        if (
+            evaluation.context
+        ) {
+
+            actionTypeElement.textContent =
+                evaluation.context.actionType ||
+                "UNKNOWN";
+
+
+            executionModeElement.textContent =
+                evaluation.context.executionMode ||
+                "UNKNOWN";
+
+
+            durationElement.textContent =
+                evaluation.context.duration ||
+                "UNKNOWN";
+
+        }
 
     }
 
@@ -766,6 +901,12 @@
             `RISK EVALUATED: ` +
 
             `${evaluation.action} — ` +
+
+            `Type ${evaluation.context.actionType} — ` +
+
+            `Mode ${evaluation.context.executionMode} — ` +
+
+            `Duration ${evaluation.context.duration} — ` +
 
             `Base ${evaluation.baseRiskLevel} — ` +
 
@@ -1034,28 +1175,15 @@
 
 
     // ==================================================
-    // A4.2 RISK FLOOR TEST
+    // A4.3 RISK FLOOR TEST
     // ==================================================
 
     function testRiskFloors() {
 
         securityLog(
-            "A4.2 risk-floor test started."
+            "A4.3 risk-floor compatibility test started."
         );
 
-
-        /*
-        ----------------------------------------------
-        EXPLICIT RISK ORDER
-
-        We intentionally keep this test-side
-        ordering separate from RiskEngine.LEVELS.
-
-        The test is checking the output of the
-        RiskEngine, not relying on its internal
-        static property.
-        ----------------------------------------------
-        */
 
         const riskOrder = {
 
@@ -1071,10 +1199,6 @@
 
 
         const tests = [
-
-            // -----------------------------------------
-            // TEST 1
-            // -----------------------------------------
 
             {
 
@@ -1102,7 +1226,16 @@
                         "LOW",
 
                     scope:
-                        "ONCE"
+                        "ONCE",
+
+                    actionType:
+                        "TRANSMIT",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
 
                 },
 
@@ -1111,10 +1244,6 @@
 
             },
 
-
-            // -----------------------------------------
-            // TEST 2
-            // -----------------------------------------
 
             {
 
@@ -1142,7 +1271,16 @@
                         "LOW",
 
                     scope:
-                        "ONCE"
+                        "ONCE",
+
+                    actionType:
+                        "WRITE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
 
                 },
 
@@ -1151,10 +1289,6 @@
 
             },
 
-
-            // -----------------------------------------
-            // TEST 3
-            // -----------------------------------------
 
             {
 
@@ -1182,7 +1316,16 @@
                         "HIGH",
 
                     scope:
-                        "ONCE"
+                        "ONCE",
+
+                    actionType:
+                        "EXECUTE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
 
                 },
 
@@ -1191,10 +1334,6 @@
 
             },
 
-
-            // -----------------------------------------
-            // TEST 4
-            // -----------------------------------------
 
             {
 
@@ -1222,7 +1361,16 @@
                         "LOW",
 
                     scope:
-                        "PERSISTENT"
+                        "PERSISTENT",
+
+                    actionType:
+                        "WRITE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
 
                 },
 
@@ -1243,7 +1391,6 @@
         for (
             const test of tests
         ) {
-
 
             const evaluation =
                 riskEngine.evaluate(
@@ -1274,7 +1421,9 @@
                 actualValue >= requiredValue;
 
 
-            if (!passed) {
+            if (
+                !passed
+            ) {
 
                 allPassed = false;
 
@@ -1283,13 +1432,21 @@
 
             results.push(
 
-                `${passed ? "PASS" : "FAIL"} — ${test.name}\n` +
+                `${passed ? "PASS" : "FAIL"} — ` +
 
-                `Base: ${evaluation.baseRiskLevel || "N/A"}\n` +
+                `${test.name}\n` +
 
-                `Final: ${evaluation.riskLevel}\n` +
+                `Base: ` +
 
-                `Required minimum: ${test.minimum}\n`
+                `${evaluation.baseRiskLevel || "N/A"}\n` +
+
+                `Final: ` +
+
+                `${evaluation.riskLevel}\n` +
+
+                `Required minimum: ` +
+
+                `${test.minimum}\n`
 
             );
 
@@ -1311,9 +1468,9 @@
 
             allPassed
 
-                ? "A4.2 RISK FLOOR TEST: ALL PASS\n"
+                ? "A4.3 RISK FLOOR TEST: ALL PASS\n"
 
-                : "A4.2 RISK FLOOR TEST: FAILURE DETECTED\n"
+                : "A4.3 RISK FLOOR TEST: FAILURE DETECTED\n"
 
         );
 
@@ -1330,9 +1487,9 @@
 
             allPassed
 
-                ? "A4.2 risk-floor test: ALL PASS."
+                ? "A4.3 risk-floor compatibility test: ALL PASS."
 
-                : "A4.2 risk-floor test: FAILURE DETECTED."
+                : "A4.3 risk-floor compatibility test: FAILURE."
 
         );
 
@@ -1340,29 +1497,321 @@
 
 
     // ==================================================
-    // INVALID ACTION TEST
+    // A4.3 ACTION CONTEXT TEST
     // ==================================================
 
-    function testInvalidAction() {
+    function testActionContext() {
 
         securityLog(
-            "A4.2 invalid-action test started."
+            "A4.3 action-context test started."
+        );
+
+
+        const tests = [
+
+            {
+
+                name:
+                    "Local single capture",
+
+                action: {
+
+                    name:
+                        "LOCAL_CAPTURE_TEST",
+
+                    permission:
+                        "CAMERA",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "CAPTURE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "SINGLE"
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "Continuous sensitive access",
+
+                action: {
+
+                    name:
+                        "CONTINUOUS_SENSITIVE_TEST",
+
+                    permission:
+                        "CAMERA",
+
+                    dataSensitivity:
+                        "SENSITIVE",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "SESSION",
+
+                    actionType:
+                        "CAPTURE",
+
+                    executionMode:
+                        "LOCAL",
+
+                    duration:
+                        "CONTINUOUS"
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "Remote transmission",
+
+                action: {
+
+                    name:
+                        "REMOTE_TRANSMIT_TEST",
+
+                    permission:
+                        "NETWORK",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "MEDIUM",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "TRANSMIT",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+
+                }
+
+            },
+
+
+            {
+
+                name:
+                    "Remote execution",
+
+                action: {
+
+                    name:
+                        "REMOTE_EXECUTE_TEST",
+
+                    permission:
+                        "NETWORK",
+
+                    dataSensitivity:
+                        "PRIVATE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "HIGH",
+
+                    scope:
+                        "ONCE",
+
+                    actionType:
+                        "EXECUTE",
+
+                    executionMode:
+                        "REMOTE",
+
+                    duration:
+                        "SINGLE"
+
+                }
+
+            }
+
+        ];
+
+
+        const results = [];
+
+
+        let allPassed = true;
+
+
+        for (
+            const test of tests
+        ) {
+
+            const evaluation =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const contextMatches =
+
+                evaluation.allowed === true &&
+
+                evaluation.context.actionType ===
+                    test.action.actionType &&
+
+                evaluation.context.executionMode ===
+                    test.action.executionMode &&
+
+                evaluation.context.duration ===
+                    test.action.duration;
+
+
+            if (
+                !contextMatches
+            ) {
+
+                allPassed = false;
+
+            }
+
+
+            results.push(
+
+                `${contextMatches ? "PASS" : "FAIL"} — ` +
+
+                `${test.name}\n` +
+
+                `Type: ` +
+
+                `${evaluation.context?.actionType || "N/A"}\n` +
+
+                `Mode: ` +
+
+                `${evaluation.context?.executionMode || "N/A"}\n` +
+
+                `Duration: ` +
+
+                `${evaluation.context?.duration || "N/A"}\n` +
+
+                `Risk: ` +
+
+                `${evaluation.riskLevel}\n`
+
+            );
+
+
+            securityLog(
+
+                `${contextMatches ? "PASS" : "FAIL"}: ` +
+
+                `${test.name} — ` +
+
+                `Context classification`
+
+            );
+
+        }
+
+
+        results.unshift(
+
+            allPassed
+
+                ? "A4.3 ACTION CONTEXT TEST: ALL PASS\n"
+
+                : "A4.3 ACTION CONTEXT TEST: FAILURE DETECTED\n"
+
+        );
+
+
+        riskTestResult.style.display =
+            "block";
+
+
+        riskTestResult.textContent =
+            results.join("\n");
+
+
+        securityLog(
+
+            allPassed
+
+                ? "A4.3 action-context test: ALL PASS."
+
+                : "A4.3 action-context test: FAILURE."
+
+        );
+
+    }
+
+
+    // ==================================================
+    // A4.3 INVALID CONTEXT TEST
+    // ==================================================
+
+    function testInvalidContext() {
+
+        securityLog(
+            "A4.3 invalid-context test started."
         );
 
 
         const invalidAction = {
 
             name:
-                "INVALID_ACTION_TEST",
+                "INVALID_CONTEXT_TEST",
 
             permission:
-                "TEST",
+                "CAMERA",
 
             dataSensitivity:
-                "UNKNOWN_VALUE",
+                "PRIVATE",
 
             externalEffect:
-                "NONE",
+                "DEVICE",
 
             reversibility:
                 "REVERSIBLE",
@@ -1371,7 +1820,16 @@
                 "LOW",
 
             scope:
-                "ONCE"
+                "ONCE",
+
+            actionType:
+                "CAPTURE",
+
+            executionMode:
+                "INVALID_MODE",
+
+            duration:
+                "SINGLE"
 
         };
 
@@ -1386,7 +1844,8 @@
 
             evaluation.allowed === false &&
 
-            evaluation.riskLevel === "CRITICAL";
+            evaluation.riskLevel ===
+                "CRITICAL";
 
 
         riskTestResult.style.display =
@@ -1395,13 +1854,19 @@
 
         riskTestResult.textContent =
 
-            `${passed ? "PASS" : "FAIL"} — Invalid Action\n\n` +
+            `${passed ? "PASS" : "FAIL"} — Invalid Context\n\n` +
 
-            `Allowed: ${evaluation.allowed}\n` +
+            `Allowed: ` +
 
-            `Risk: ${evaluation.riskLevel}\n` +
+            `${evaluation.allowed}\n` +
 
-            `Reason: ${evaluation.reason}\n` +
+            `Risk: ` +
+
+            `${evaluation.riskLevel}\n` +
+
+            `Reason: ` +
+
+            `${evaluation.reason}\n` +
 
             `Additional authentication required: ` +
 
@@ -1412,7 +1877,7 @@
 
             `${passed ? "PASS" : "FAIL"}: ` +
 
-            `Invalid action — ` +
+            `Invalid context — ` +
 
             `${evaluation.reason}`
 
@@ -1420,7 +1885,7 @@
 
 
         securityLog(
-            "A4.2 invalid-action test completed."
+            "A4.3 invalid-context test completed."
         );
 
     }
@@ -1487,9 +1952,15 @@
     );
 
 
+    contextTestButton.addEventListener(
+        "click",
+        testActionContext
+    );
+
+
     invalidTestButton.addEventListener(
         "click",
-        testInvalidAction
+        testInvalidContext
     );
 
 
@@ -1519,11 +1990,9 @@
 
 
     securityLog(
-        "Risk Engine v0.2 initialized."
+        "Risk Engine v0.3 initialized."
     );
 
-
-    // Initial risk evaluation
 
     evaluateCameraRisk();
 
