@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Raiven — Security Core</title>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>RAIVEN — Security Core</title>
 
     <style>
 
@@ -135,6 +141,8 @@
             font-size: 13px;
             color: #9ca8bb;
             white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .test-result {
@@ -153,9 +161,16 @@
 
 </head>
 
+
 <body>
 
+
 <div class="container">
+
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
 
     <header>
 
@@ -168,7 +183,9 @@
     </header>
 
 
+    <!-- ========================================= -->
     <!-- SECURITY STATUS -->
+    <!-- ========================================= -->
 
     <div class="card security-status">
 
@@ -186,7 +203,9 @@
     </div>
 
 
-    <!-- PROTECTED ACTION REQUEST -->
+    <!-- ========================================= -->
+    <!-- PROTECTED ACTION -->
+    <!-- ========================================= -->
 
     <div class="card">
 
@@ -308,7 +327,9 @@
     </div>
 
 
+    <!-- ========================================= -->
     <!-- A4.2 TEST PANEL -->
+    <!-- ========================================= -->
 
     <div class="card">
 
@@ -367,7 +388,9 @@
     </div>
 
 
-    <!-- EMERGENCY STOP -->
+    <!-- ========================================= -->
+    <!-- EMERGENCY CONTROL -->
+    <!-- ========================================= -->
 
     <div class="card">
 
@@ -386,12 +409,16 @@
     </div>
 
 
+    <!-- ========================================= -->
     <!-- RESULT -->
+    <!-- ========================================= -->
 
     <div id="result"></div>
 
 
+    <!-- ========================================= -->
     <!-- SECURITY LOG -->
+    <!-- ========================================= -->
 
     <div class="card">
 
@@ -409,14 +436,16 @@
 
     </div>
 
+
 </div>
+
 
 
 <script type="module">
 
 
     // ==================================================
-    // SECURITY MODULES
+    // SECURITY MODULE IMPORTS
     // ==================================================
 
     import {
@@ -453,7 +482,7 @@
 
 
     // ==================================================
-    // LOGGING
+    // SECURITY LOG
     // ==================================================
 
     function securityLog(event) {
@@ -598,7 +627,7 @@
 
 
     // ==================================================
-    // SECURITY MODULES
+    // SECURITY MODULE INSTANCES
     // ==================================================
 
     const permissionManager =
@@ -611,31 +640,42 @@
 
     const actionGuard =
         new ActionGuard(
+
             permissionManager,
+
             SecurityState,
+
             securityLog
+
         );
 
 
     // ==================================================
-    // PROTECTED ACTION
+    // CAMERA ACTION DEFINITION
     // ==================================================
 
     const cameraAction = {
 
-        name: "CAMERA_ACCESS_TEST",
+        name:
+            "CAMERA_ACCESS_TEST",
 
-        permission: "CAMERA",
+        permission:
+            "CAMERA",
 
-        dataSensitivity: "PRIVATE",
+        dataSensitivity:
+            "PRIVATE",
 
-        externalEffect: "DEVICE",
+        externalEffect:
+            "DEVICE",
 
-        reversibility: "REVERSIBLE",
+        reversibility:
+            "REVERSIBLE",
 
-        userImpact: "MEDIUM",
+        userImpact:
+            "MEDIUM",
 
-        scope: "ONCE"
+        scope:
+            "ONCE"
 
     };
 
@@ -646,7 +686,15 @@
 
     function displayRisk(evaluation) {
 
-        if (!evaluation.allowed) {
+        console.log(
+            "RAIVEN RISK EVALUATION:",
+            evaluation
+        );
+
+
+        if (
+            !evaluation.allowed
+        ) {
 
             baseRiskLevel.textContent =
                 "CRITICAL";
@@ -666,21 +714,24 @@
 
 
         baseRiskLevel.textContent =
-            evaluation.baseRiskLevel;
+            evaluation.baseRiskLevel ||
+            "UNKNOWN";
 
 
         riskLevel.textContent =
-            evaluation.riskLevel;
+            evaluation.riskLevel ||
+            "UNKNOWN";
 
 
         riskScore.textContent =
-            evaluation.riskScore;
+            evaluation.riskScore ??
+            "—";
 
     }
 
 
     // ==================================================
-    // RISK EVALUATION
+    // CAMERA RISK EVALUATION
     // ==================================================
 
     function evaluateCameraRisk() {
@@ -691,10 +742,14 @@
             );
 
 
-        displayRisk(evaluation);
+        displayRisk(
+            evaluation
+        );
 
 
-        if (!evaluation.allowed) {
+        if (
+            !evaluation.allowed
+        ) {
 
             securityLog(
                 `RISK EVALUATION FAILED: ${evaluation.reason}`
@@ -707,27 +762,53 @@
 
 
         securityLog(
-            `RISK EVALUATED: ${evaluation.action} — Base ${evaluation.baseRiskLevel} — Final ${evaluation.riskLevel} — Score ${evaluation.riskScore}`
+
+            `RISK EVALUATED: ` +
+
+            `${evaluation.action} — ` +
+
+            `Base ${evaluation.baseRiskLevel} — ` +
+
+            `Final ${evaluation.riskLevel} — ` +
+
+            `Score ${evaluation.riskScore}`
+
         );
 
 
         securityLog(
-            `Confirmation required: ${evaluation.requirements.requiresConfirmation}`
+
+            `Confirmation required: ` +
+
+            `${evaluation.requirements.requiresConfirmation}`
+
         );
 
 
         securityLog(
-            `Explicit confirmation required: ${evaluation.requirements.requiresExplicitConfirmation}`
+
+            `Explicit confirmation required: ` +
+
+            `${evaluation.requirements.requiresExplicitConfirmation}`
+
         );
 
 
         securityLog(
-            `Additional authentication required: ${evaluation.requirements.requiresAdditionalAuthentication}`
+
+            `Additional authentication required: ` +
+
+            `${evaluation.requirements.requiresAdditionalAuthentication}`
+
         );
 
 
         securityLog(
-            `Audit log required: ${evaluation.requirements.requiresAuditLog}`
+
+            `Audit log required: ` +
+
+            `${evaluation.requirements.requiresAuditLog}`
+
         );
 
 
@@ -737,7 +818,7 @@
 
 
     // ==================================================
-    // REQUEST PERMISSION
+    // REQUEST CAMERA PERMISSION
     // ==================================================
 
     function requestPermission() {
@@ -811,7 +892,13 @@
 
 
         securityLog(
-            `Permission request created: ${request.permission} — ${request.scope}`
+
+            `Permission request created: ` +
+
+            `${request.permission} — ` +
+
+            `${request.scope}`
+
         );
 
 
@@ -822,7 +909,11 @@
 
 
         showResult(
-            `PERMISSION GRANTED: CAMERA — ONCE | RISK: ${evaluation.riskLevel}`
+
+            `PERMISSION GRANTED: CAMERA — ONCE | ` +
+
+            `RISK: ${evaluation.riskLevel}`
+
         );
 
 
@@ -834,7 +925,7 @@
 
 
     // ==================================================
-    // DENY PERMISSION
+    // DENY CAMERA PERMISSION
     // ==================================================
 
     function denyPermission() {
@@ -920,7 +1011,13 @@
         ) {
 
             showResult(
-                `PROTECTED ACTION EXECUTED AND PERMISSION CONSUMED. RISK: ${evaluation.riskLevel}`
+
+                `PROTECTED ACTION EXECUTED ` +
+
+                `AND PERMISSION CONSUMED. ` +
+
+                `RISK: ${evaluation.riskLevel}`
+
             );
 
 
@@ -947,9 +1044,40 @@
         );
 
 
+        /*
+        ----------------------------------------------
+        EXPLICIT RISK ORDER
+
+        We intentionally keep this test-side
+        ordering separate from RiskEngine.LEVELS.
+
+        The test is checking the output of the
+        RiskEngine, not relying on its internal
+        static property.
+        ----------------------------------------------
+        */
+
+        const riskOrder = {
+
+            LOW: 1,
+
+            MEDIUM: 2,
+
+            HIGH: 3,
+
+            CRITICAL: 4
+
+        };
+
+
         const tests = [
 
+            // -----------------------------------------
+            // TEST 1
+            // -----------------------------------------
+
             {
+
                 name:
                     "Sensitive data + Network",
 
@@ -984,7 +1112,12 @@
             },
 
 
+            // -----------------------------------------
+            // TEST 2
+            // -----------------------------------------
+
             {
+
                 name:
                     "Irreversible action",
 
@@ -1019,7 +1152,12 @@
             },
 
 
+            // -----------------------------------------
+            // TEST 3
+            // -----------------------------------------
+
             {
+
                 name:
                     "Irreversible + High impact",
 
@@ -1054,7 +1192,12 @@
             },
 
 
+            // -----------------------------------------
+            // TEST 4
+            // -----------------------------------------
+
             {
+
                 name:
                     "Persistent + Sensitive",
 
@@ -1094,9 +1237,13 @@
         const results = [];
 
 
+        let allPassed = true;
+
+
         for (
             const test of tests
         ) {
+
 
             const evaluation =
                 riskEngine.evaluate(
@@ -1104,31 +1251,71 @@
                 );
 
 
-            const passed =
-                evaluation.allowed &&
-                riskEngine.LEVELS
-                ? RiskEngine.LEVELS[
+            const actualValue =
+                riskOrder[
                     evaluation.riskLevel
-                ] >=
-                RiskEngine.LEVELS[
+                ];
+
+
+            const requiredValue =
+                riskOrder[
                     test.minimum
-                ]
-                : false;
+                ];
+
+
+            const passed =
+
+                evaluation.allowed === true &&
+
+                actualValue !== undefined &&
+
+                requiredValue !== undefined &&
+
+                actualValue >= requiredValue;
+
+
+            if (!passed) {
+
+                allPassed = false;
+
+            }
 
 
             results.push(
+
                 `${passed ? "PASS" : "FAIL"} — ${test.name}\n` +
+
                 `Base: ${evaluation.baseRiskLevel || "N/A"}\n` +
+
                 `Final: ${evaluation.riskLevel}\n` +
+
                 `Required minimum: ${test.minimum}\n`
+
             );
 
 
             securityLog(
-                `${passed ? "PASS" : "FAIL"}: ${test.name} — Final ${evaluation.riskLevel}`
+
+                `${passed ? "PASS" : "FAIL"}: ` +
+
+                `${test.name} — ` +
+
+                `Final ${evaluation.riskLevel}`
+
             );
 
         }
+
+
+        results.unshift(
+
+            allPassed
+
+                ? "A4.2 RISK FLOOR TEST: ALL PASS\n"
+
+                : "A4.2 RISK FLOOR TEST: FAILURE DETECTED\n"
+
+        );
 
 
         riskTestResult.style.display =
@@ -1140,7 +1327,13 @@
 
 
         securityLog(
-            "A4.2 risk-floor test completed."
+
+            allPassed
+
+                ? "A4.2 risk-floor test: ALL PASS."
+
+                : "A4.2 risk-floor test: FAILURE DETECTED."
+
         );
 
     }
@@ -1190,7 +1383,9 @@
 
 
         const passed =
+
             evaluation.allowed === false &&
+
             evaluation.riskLevel === "CRITICAL";
 
 
@@ -1214,7 +1409,13 @@
 
 
         securityLog(
-            `${passed ? "PASS" : "FAIL"}: Invalid action — ${evaluation.reason}`
+
+            `${passed ? "PASS" : "FAIL"}: ` +
+
+            `Invalid action — ` +
+
+            `${evaluation.reason}`
+
         );
 
 
@@ -1322,10 +1523,14 @@
     );
 
 
+    // Initial risk evaluation
+
     evaluateCameraRisk();
 
 
 </script>
 
+
 </body>
+
 </html>
