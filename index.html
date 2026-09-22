@@ -66,6 +66,12 @@
             margin-bottom: 15px;
         }
 
+        .section-title {
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
         .row {
             display: flex;
             justify-content: space-between;
@@ -103,6 +109,10 @@
             background: #315a91;
         }
 
+        .riskTest {
+            background: #624b9b;
+        }
+
         .stop {
             background: #6b1f27;
         }
@@ -124,6 +134,18 @@
             font-family: monospace;
             font-size: 13px;
             color: #9ca8bb;
+            white-space: pre-wrap;
+        }
+
+        .test-result {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #0b1019;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.5;
             white-space: pre-wrap;
         }
 
@@ -202,7 +224,23 @@
         <div class="row">
 
             <span>
-                Risk
+                Base Risk
+            </span>
+
+            <span
+                id="baseRiskLevel"
+                class="value"
+            >
+                NOT EVALUATED
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Final Risk
             </span>
 
             <span
@@ -270,6 +308,65 @@
     </div>
 
 
+    <!-- A4.2 TEST PANEL -->
+
+    <div class="card">
+
+        <div class="section-title">
+            A4.2 Risk Security Tests
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Risk Floors
+            </span>
+
+            <span class="value">
+                ENABLED
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Fail Closed
+            </span>
+
+            <span class="value">
+                ENABLED
+            </span>
+
+        </div>
+
+
+        <button
+            id="riskFloorTestButton"
+            class="riskTest"
+        >
+            TEST RISK FLOORS
+        </button>
+
+
+        <button
+            id="invalidTestButton"
+            class="riskTest"
+        >
+            TEST INVALID ACTION
+        </button>
+
+
+        <div
+            id="riskTestResult"
+            class="test-result"
+        ></div>
+
+    </div>
+
+
     <!-- EMERGENCY STOP -->
 
     <div class="card">
@@ -315,16 +412,12 @@
 </div>
 
 
-<!-- ==================================================
-     RAIVEN SECURITY CORE
-================================================== -->
-
 <script type="module">
 
 
-    // --------------------------------------------------
+    // ==================================================
     // SECURITY MODULES
-    // --------------------------------------------------
+    // ==================================================
 
     import {
         PermissionManager
@@ -344,32 +437,9 @@
     from "./js/security/RiskEngine.js";
 
 
-    /*
-    ====================================================
-    RAIVEN SECURITY CORE
-
-    SECURITY PIPELINE
-
-    User Request
-          ↓
-    Risk Engine
-          ↓
-    Permission Manager
-          ↓
-    Action Guard
-          ↓
-    Protected Action
-          ↓
-    Permission Consumption
-          ↓
-    Security Log
-    ====================================================
-    */
-
-
-    // --------------------------------------------------
+    // ==================================================
     // SECURITY STATE
-    // --------------------------------------------------
+    // ==================================================
 
     const SecurityState = {
 
@@ -382,9 +452,9 @@
     };
 
 
-    // --------------------------------------------------
+    // ==================================================
     // LOGGING
-    // --------------------------------------------------
+    // ==================================================
 
     function securityLog(event) {
 
@@ -437,9 +507,9 @@
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // RESULT DISPLAY
-    // --------------------------------------------------
+    // ==================================================
 
     function showResult(message) {
 
@@ -457,13 +527,19 @@
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // DOM REFERENCES
-    // --------------------------------------------------
+    // ==================================================
 
     const securityStatus =
         document.getElementById(
             "securityStatus"
+        );
+
+
+    const baseRiskLevel =
+        document.getElementById(
+            "baseRiskLevel"
         );
 
 
@@ -497,15 +573,33 @@
         );
 
 
+    const riskFloorTestButton =
+        document.getElementById(
+            "riskFloorTestButton"
+        );
+
+
+    const invalidTestButton =
+        document.getElementById(
+            "invalidTestButton"
+        );
+
+
+    const riskTestResult =
+        document.getElementById(
+            "riskTestResult"
+        );
+
+
     const stopButton =
         document.getElementById(
             "stopButton"
         );
 
 
-    // --------------------------------------------------
+    // ==================================================
     // SECURITY MODULES
-    // --------------------------------------------------
+    // ==================================================
 
     const permissionManager =
         new PermissionManager();
@@ -523,9 +617,9 @@
         );
 
 
-    // --------------------------------------------------
-    // PROTECTED ACTION DEFINITION
-    // --------------------------------------------------
+    // ==================================================
+    // PROTECTED ACTION
+    // ==================================================
 
     const cameraAction = {
 
@@ -546,9 +640,48 @@
     };
 
 
-    // --------------------------------------------------
+    // ==================================================
+    // DISPLAY RISK
+    // ==================================================
+
+    function displayRisk(evaluation) {
+
+        if (!evaluation.allowed) {
+
+            baseRiskLevel.textContent =
+                "CRITICAL";
+
+
+            riskLevel.textContent =
+                "CRITICAL";
+
+
+            riskScore.textContent =
+                "INVALID";
+
+
+            return;
+
+        }
+
+
+        baseRiskLevel.textContent =
+            evaluation.baseRiskLevel;
+
+
+        riskLevel.textContent =
+            evaluation.riskLevel;
+
+
+        riskScore.textContent =
+            evaluation.riskScore;
+
+    }
+
+
+    // ==================================================
     // RISK EVALUATION
-    // --------------------------------------------------
+    // ==================================================
 
     function evaluateCameraRisk() {
 
@@ -558,13 +691,10 @@
             );
 
 
+        displayRisk(evaluation);
+
+
         if (!evaluation.allowed) {
-
-            riskLevel.textContent =
-                evaluation.riskLevel;
-
-            riskScore.textContent =
-                "INVALID";
 
             securityLog(
                 `RISK EVALUATION FAILED: ${evaluation.reason}`
@@ -576,16 +706,8 @@
         }
 
 
-        riskLevel.textContent =
-            evaluation.riskLevel;
-
-
-        riskScore.textContent =
-            evaluation.riskScore;
-
-
         securityLog(
-            `RISK EVALUATED: ${evaluation.action} — ${evaluation.riskLevel} — Score ${evaluation.riskScore}`
+            `RISK EVALUATED: ${evaluation.action} — Base ${evaluation.baseRiskLevel} — Final ${evaluation.riskLevel} — Score ${evaluation.riskScore}`
         );
 
 
@@ -604,14 +726,19 @@
         );
 
 
+        securityLog(
+            `Audit log required: ${evaluation.requirements.requiresAuditLog}`
+        );
+
+
         return evaluation;
 
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // REQUEST PERMISSION
-    // --------------------------------------------------
+    // ==================================================
 
     function requestPermission() {
 
@@ -619,10 +746,6 @@
             "Permission requested: CAMERA"
         );
 
-
-        // ----------------------------------------------
-        // EMERGENCY STOP
-        // ----------------------------------------------
 
         if (
             SecurityState.emergencyStopped
@@ -643,10 +766,6 @@
         }
 
 
-        // ----------------------------------------------
-        // SECURITY CORE
-        // ----------------------------------------------
-
         if (
             !SecurityState.active
         ) {
@@ -666,10 +785,6 @@
         }
 
 
-        // ----------------------------------------------
-        // RISK EVALUATION
-        // ----------------------------------------------
-
         const evaluation =
             evaluateCameraRisk();
 
@@ -687,18 +802,6 @@
 
         }
 
-
-        /*
-        ------------------------------------------------
-        USER APPROVAL
-
-        Risk Engine has evaluated the action.
-
-        It does NOT grant permission.
-
-        The user must still explicitly approve.
-        ------------------------------------------------
-        */
 
         const request =
             permissionManager.request(
@@ -730,9 +833,9 @@
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // DENY PERMISSION
-    // --------------------------------------------------
+    // ==================================================
 
     function denyPermission() {
 
@@ -753,9 +856,9 @@
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // TEST PROTECTED ACTION
-    // --------------------------------------------------
+    // ==================================================
 
     function testProtectedAction() {
 
@@ -763,10 +866,6 @@
             "Protected action requested: CAMERA_ACCESS_TEST"
         );
 
-
-        // ----------------------------------------------
-        // RISK EVALUATION
-        // ----------------------------------------------
 
         const evaluation =
             evaluateCameraRisk();
@@ -786,10 +885,6 @@
         }
 
 
-        // ----------------------------------------------
-        // ACTION GUARD
-        // ----------------------------------------------
-
         const result =
             actionGuard.execute(
 
@@ -799,24 +894,12 @@
 
                 () => {
 
-                    /*
-                    ------------------------------------
-                    SIMULATED ACTION
-
-                    This does NOT access the real camera.
-                    ------------------------------------
-                    */
-
                     return "SIMULATED_CAMERA_ACCESS";
 
                 }
 
             );
 
-
-        // ----------------------------------------------
-        // ACTION BLOCKED
-        // ----------------------------------------------
 
         if (
             !result.allowed
@@ -832,10 +915,6 @@
         }
 
 
-        // ----------------------------------------------
-        // ACTION EXECUTED
-        // ----------------------------------------------
-
         if (
             result.executed
         ) {
@@ -850,10 +929,6 @@
         }
 
 
-        // ----------------------------------------------
-        // EXECUTION FAILURE
-        // ----------------------------------------------
-
         showResult(
             `ACTION FAILED: ${result.reason}`
         );
@@ -861,19 +936,304 @@
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
+    // A4.2 RISK FLOOR TEST
+    // ==================================================
+
+    function testRiskFloors() {
+
+        securityLog(
+            "A4.2 risk-floor test started."
+        );
+
+
+        const tests = [
+
+            {
+                name:
+                    "Sensitive data + Network",
+
+                action: {
+
+                    name:
+                        "NETWORK_SENSITIVE_TEST",
+
+                    permission:
+                        "NETWORK",
+
+                    dataSensitivity:
+                        "SENSITIVE",
+
+                    externalEffect:
+                        "NETWORK",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE"
+
+                },
+
+                minimum:
+                    "HIGH"
+
+            },
+
+
+            {
+                name:
+                    "Irreversible action",
+
+                action: {
+
+                    name:
+                        "IRREVERSIBLE_TEST",
+
+                    permission:
+                        "NONE",
+
+                    dataSensitivity:
+                        "PUBLIC",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "IRREVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "ONCE"
+
+                },
+
+                minimum:
+                    "HIGH"
+
+            },
+
+
+            {
+                name:
+                    "Irreversible + High impact",
+
+                action: {
+
+                    name:
+                        "CRITICAL_ACTION_TEST",
+
+                    permission:
+                        "DEVICE",
+
+                    dataSensitivity:
+                        "PUBLIC",
+
+                    externalEffect:
+                        "DEVICE",
+
+                    reversibility:
+                        "IRREVERSIBLE",
+
+                    userImpact:
+                        "HIGH",
+
+                    scope:
+                        "ONCE"
+
+                },
+
+                minimum:
+                    "CRITICAL"
+
+            },
+
+
+            {
+                name:
+                    "Persistent + Sensitive",
+
+                action: {
+
+                    name:
+                        "PERSISTENT_SENSITIVE_TEST",
+
+                    permission:
+                        "STORAGE",
+
+                    dataSensitivity:
+                        "SENSITIVE",
+
+                    externalEffect:
+                        "NONE",
+
+                    reversibility:
+                        "REVERSIBLE",
+
+                    userImpact:
+                        "LOW",
+
+                    scope:
+                        "PERSISTENT"
+
+                },
+
+                minimum:
+                    "HIGH"
+
+            }
+
+        ];
+
+
+        const results = [];
+
+
+        for (
+            const test of tests
+        ) {
+
+            const evaluation =
+                riskEngine.evaluate(
+                    test.action
+                );
+
+
+            const passed =
+                evaluation.allowed &&
+                riskEngine.LEVELS
+                ? RiskEngine.LEVELS[
+                    evaluation.riskLevel
+                ] >=
+                RiskEngine.LEVELS[
+                    test.minimum
+                ]
+                : false;
+
+
+            results.push(
+                `${passed ? "PASS" : "FAIL"} — ${test.name}\n` +
+                `Base: ${evaluation.baseRiskLevel || "N/A"}\n` +
+                `Final: ${evaluation.riskLevel}\n` +
+                `Required minimum: ${test.minimum}\n`
+            );
+
+
+            securityLog(
+                `${passed ? "PASS" : "FAIL"}: ${test.name} — Final ${evaluation.riskLevel}`
+            );
+
+        }
+
+
+        riskTestResult.style.display =
+            "block";
+
+
+        riskTestResult.textContent =
+            results.join("\n");
+
+
+        securityLog(
+            "A4.2 risk-floor test completed."
+        );
+
+    }
+
+
+    // ==================================================
+    // INVALID ACTION TEST
+    // ==================================================
+
+    function testInvalidAction() {
+
+        securityLog(
+            "A4.2 invalid-action test started."
+        );
+
+
+        const invalidAction = {
+
+            name:
+                "INVALID_ACTION_TEST",
+
+            permission:
+                "TEST",
+
+            dataSensitivity:
+                "UNKNOWN_VALUE",
+
+            externalEffect:
+                "NONE",
+
+            reversibility:
+                "REVERSIBLE",
+
+            userImpact:
+                "LOW",
+
+            scope:
+                "ONCE"
+
+        };
+
+
+        const evaluation =
+            riskEngine.evaluate(
+                invalidAction
+            );
+
+
+        const passed =
+            evaluation.allowed === false &&
+            evaluation.riskLevel === "CRITICAL";
+
+
+        riskTestResult.style.display =
+            "block";
+
+
+        riskTestResult.textContent =
+
+            `${passed ? "PASS" : "FAIL"} — Invalid Action\n\n` +
+
+            `Allowed: ${evaluation.allowed}\n` +
+
+            `Risk: ${evaluation.riskLevel}\n` +
+
+            `Reason: ${evaluation.reason}\n` +
+
+            `Additional authentication required: ` +
+
+            `${evaluation.requirements.requiresAdditionalAuthentication}`;
+
+
+        securityLog(
+            `${passed ? "PASS" : "FAIL"}: Invalid action — ${evaluation.reason}`
+        );
+
+
+        securityLog(
+            "A4.2 invalid-action test completed."
+        );
+
+    }
+
+
+    // ==================================================
     // EMERGENCY STOP
-    // --------------------------------------------------
+    // ==================================================
 
     function emergencyStop() {
 
         SecurityState.emergencyStopped =
             true;
 
-
-        /*
-        Remove every active permission.
-        */
 
         permissionManager.clearAll();
 
@@ -898,9 +1258,9 @@
     }
 
 
-    // --------------------------------------------------
+    // ==================================================
     // BUTTON EVENTS
-    // --------------------------------------------------
+    // ==================================================
 
     allowButton.addEventListener(
         "click",
@@ -920,15 +1280,27 @@
     );
 
 
+    riskFloorTestButton.addEventListener(
+        "click",
+        testRiskFloors
+    );
+
+
+    invalidTestButton.addEventListener(
+        "click",
+        testInvalidAction
+    );
+
+
     stopButton.addEventListener(
         "click",
         emergencyStop
     );
 
 
-    // --------------------------------------------------
+    // ==================================================
     // INITIALIZATION
-    // --------------------------------------------------
+    // ==================================================
 
     securityLog(
         "Security Core initialized."
@@ -946,11 +1318,9 @@
 
 
     securityLog(
-        "Risk Engine initialized."
+        "Risk Engine v0.2 initialized."
     );
 
-
-    // Evaluate the protected action at startup.
 
     evaluateCameraRisk();
 
