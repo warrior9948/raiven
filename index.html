@@ -205,8 +205,27 @@
                 Risk
             </span>
 
-            <span class="value">
-                MEDIUM
+            <span
+                id="riskLevel"
+                class="value"
+            >
+                NOT EVALUATED
+            </span>
+
+        </div>
+
+
+        <div class="row">
+
+            <span>
+                Risk Score
+            </span>
+
+            <span
+                id="riskScore"
+                class="value"
+            >
+                —
             </span>
 
         </div>
@@ -302,6 +321,11 @@
 
 <script type="module">
 
+
+    // --------------------------------------------------
+    // SECURITY MODULES
+    // --------------------------------------------------
+
     import {
         PermissionManager
     }
@@ -314,28 +338,31 @@
     from "./js/security/ActionGuard.js";
 
 
+    import {
+        RiskEngine
+    }
+    from "./js/security/RiskEngine.js";
+
+
     /*
     ====================================================
     RAIVEN SECURITY CORE
-    ====================================================
 
-    A3 ACTION GUARD
+    SECURITY PIPELINE
 
-    Protected actions must pass through:
-
-    Security Core
+    User Request
+          ↓
+    Risk Engine
           ↓
     Permission Manager
           ↓
     Action Guard
           ↓
-    Authorization
-          ↓
-    Execution
+    Protected Action
           ↓
     Permission Consumption
           ↓
-    Logging
+    Security Log
     ====================================================
     */
 
@@ -431,32 +458,24 @@
 
 
     // --------------------------------------------------
-    // PERMISSION MANAGER
-    // --------------------------------------------------
-
-    const permissionManager =
-        new PermissionManager();
-
-
-    // --------------------------------------------------
-    // ACTION GUARD
-    // --------------------------------------------------
-
-    const actionGuard =
-        new ActionGuard(
-            permissionManager,
-            SecurityState,
-            securityLog
-        );
-
-
-    // --------------------------------------------------
     // DOM REFERENCES
     // --------------------------------------------------
 
     const securityStatus =
         document.getElementById(
             "securityStatus"
+        );
+
+
+    const riskLevel =
+        document.getElementById(
+            "riskLevel"
+        );
+
+
+    const riskScore =
+        document.getElementById(
+            "riskScore"
         );
 
 
@@ -485,6 +504,112 @@
 
 
     // --------------------------------------------------
+    // SECURITY MODULES
+    // --------------------------------------------------
+
+    const permissionManager =
+        new PermissionManager();
+
+
+    const riskEngine =
+        new RiskEngine();
+
+
+    const actionGuard =
+        new ActionGuard(
+            permissionManager,
+            SecurityState,
+            securityLog
+        );
+
+
+    // --------------------------------------------------
+    // PROTECTED ACTION DEFINITION
+    // --------------------------------------------------
+
+    const cameraAction = {
+
+        name: "CAMERA_ACCESS_TEST",
+
+        permission: "CAMERA",
+
+        dataSensitivity: "PRIVATE",
+
+        externalEffect: "DEVICE",
+
+        reversibility: "REVERSIBLE",
+
+        userImpact: "MEDIUM",
+
+        scope: "ONCE"
+
+    };
+
+
+    // --------------------------------------------------
+    // RISK EVALUATION
+    // --------------------------------------------------
+
+    function evaluateCameraRisk() {
+
+        const evaluation =
+            riskEngine.evaluate(
+                cameraAction
+            );
+
+
+        if (!evaluation.allowed) {
+
+            riskLevel.textContent =
+                evaluation.riskLevel;
+
+            riskScore.textContent =
+                "INVALID";
+
+            securityLog(
+                `RISK EVALUATION FAILED: ${evaluation.reason}`
+            );
+
+
+            return evaluation;
+
+        }
+
+
+        riskLevel.textContent =
+            evaluation.riskLevel;
+
+
+        riskScore.textContent =
+            evaluation.riskScore;
+
+
+        securityLog(
+            `RISK EVALUATED: ${evaluation.action} — ${evaluation.riskLevel} — Score ${evaluation.riskScore}`
+        );
+
+
+        securityLog(
+            `Confirmation required: ${evaluation.requirements.requiresConfirmation}`
+        );
+
+
+        securityLog(
+            `Explicit confirmation required: ${evaluation.requirements.requiresExplicitConfirmation}`
+        );
+
+
+        securityLog(
+            `Additional authentication required: ${evaluation.requirements.requiresAdditionalAuthentication}`
+        );
+
+
+        return evaluation;
+
+    }
+
+
+    // --------------------------------------------------
     // REQUEST PERMISSION
     // --------------------------------------------------
 
@@ -495,7 +620,9 @@
         );
 
 
-        // Emergency STOP has highest priority.
+        // ----------------------------------------------
+        // EMERGENCY STOP
+        // ----------------------------------------------
 
         if (
             SecurityState.emergencyStopped
@@ -516,7 +643,9 @@
         }
 
 
-        // Security Core must be active.
+        // ----------------------------------------------
+        // SECURITY CORE
+        // ----------------------------------------------
 
         if (
             !SecurityState.active
@@ -537,7 +666,39 @@
         }
 
 
-        // Create request.
+        // ----------------------------------------------
+        // RISK EVALUATION
+        // ----------------------------------------------
+
+        const evaluation =
+            evaluateCameraRisk();
+
+
+        if (
+            !evaluation.allowed
+        ) {
+
+            showResult(
+                "BLOCKED: Risk evaluation failed."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ------------------------------------------------
+        USER APPROVAL
+
+        Risk Engine has evaluated the action.
+
+        It does NOT grant permission.
+
+        The user must still explicitly approve.
+        ------------------------------------------------
+        */
 
         const request =
             permissionManager.request(
@@ -551,20 +712,6 @@
         );
 
 
-        /*
-        ------------------------------------------------
-        USER APPROVAL
-        ------------------------------------------------
-
-        This button represents the user's explicit
-        approval of the permission request.
-
-        The UI does not directly modify a permission
-        object. It asks the Permission Manager to
-        create the approved permission record.
-        ------------------------------------------------
-        */
-
         permissionManager.grant(
             "CAMERA",
             "ONCE"
@@ -572,7 +719,7 @@
 
 
         showResult(
-            "PERMISSION GRANTED: CAMERA — ONCE"
+            `PERMISSION GRANTED: CAMERA — ONCE | RISK: ${evaluation.riskLevel}`
         );
 
 
@@ -617,6 +764,32 @@
         );
 
 
+        // ----------------------------------------------
+        // RISK EVALUATION
+        // ----------------------------------------------
+
+        const evaluation =
+            evaluateCameraRisk();
+
+
+        if (
+            !evaluation.allowed
+        ) {
+
+            showResult(
+                "ACTION BLOCKED: RISK_EVALUATION_FAILED"
+            );
+
+
+            return;
+
+        }
+
+
+        // ----------------------------------------------
+        // ACTION GUARD
+        // ----------------------------------------------
+
         const result =
             actionGuard.execute(
 
@@ -631,9 +804,6 @@
                     SIMULATED ACTION
 
                     This does NOT access the real camera.
-
-                    We are testing the security pipeline
-                    before connecting real capabilities.
                     ------------------------------------
                     */
 
@@ -644,9 +814,9 @@
             );
 
 
-        // ------------------------------------------------
+        // ----------------------------------------------
         // ACTION BLOCKED
-        // ------------------------------------------------
+        // ----------------------------------------------
 
         if (
             !result.allowed
@@ -662,16 +832,16 @@
         }
 
 
-        // ------------------------------------------------
+        // ----------------------------------------------
         // ACTION EXECUTED
-        // ------------------------------------------------
+        // ----------------------------------------------
 
         if (
             result.executed
         ) {
 
             showResult(
-                "PROTECTED ACTION EXECUTED AND PERMISSION CONSUMED."
+                `PROTECTED ACTION EXECUTED AND PERMISSION CONSUMED. RISK: ${evaluation.riskLevel}`
             );
 
 
@@ -680,9 +850,9 @@
         }
 
 
-        // ------------------------------------------------
+        // ----------------------------------------------
         // EXECUTION FAILURE
-        // ------------------------------------------------
+        // ----------------------------------------------
 
         showResult(
             `ACTION FAILED: ${result.reason}`
@@ -773,6 +943,16 @@
     securityLog(
         "Action Guard initialized."
     );
+
+
+    securityLog(
+        "Risk Engine initialized."
+    );
+
+
+    // Evaluate the protected action at startup.
+
+    evaluateCameraRisk();
 
 
 </script>
