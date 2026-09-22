@@ -1,13 +1,13 @@
-// RAIVEN Risk Engine v0.1
-// Stage A4.1
+// RAIVEN Risk Engine v0.2
+// Stage A4.2
 //
 // Purpose:
-// Determine the security risk of a requested action.
+// Strong, deterministic risk classification.
 //
 // IMPORTANT:
 // RiskEngine NEVER grants permission.
 // RiskEngine NEVER executes actions.
-// RiskEngine ONLY evaluates risk and returns
+// RiskEngine ONLY evaluates risk and
 // security requirements.
 
 
@@ -15,7 +15,7 @@ export class RiskEngine {
 
     constructor() {
 
-        this.version = "0.1";
+        this.version = "0.2";
 
     }
 
@@ -24,7 +24,7 @@ export class RiskEngine {
     // RISK LEVELS
     // --------------------------------------------------
 
-    static LEVELS = {
+    static LEVELS = Object.freeze({
 
         LOW: 1,
 
@@ -34,66 +34,131 @@ export class RiskEngine {
 
         CRITICAL: 4
 
-    };
+    });
 
 
     // --------------------------------------------------
-    // RISK EVALUATION
+    // ALLOWED VALUES
     // --------------------------------------------------
 
-    evaluate(action) {
+    static VALUES = Object.freeze({
 
-        if (!action || typeof action !== "object") {
+        dataSensitivity: [
+            "PUBLIC",
+            "PRIVATE",
+            "SENSITIVE"
+        ],
+
+        externalEffect: [
+            "NONE",
+            "DEVICE",
+            "NETWORK"
+        ],
+
+        reversibility: [
+            "REVERSIBLE",
+            "IRREVERSIBLE"
+        ],
+
+        userImpact: [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+        ],
+
+        scope: [
+            "ONCE",
+            "SESSION",
+            "PERSISTENT"
+        ]
+
+    });
+
+
+    // --------------------------------------------------
+    // VALIDATE ACTION
+    // --------------------------------------------------
+
+    validateAction(action) {
+
+        if (
+            !action ||
+            typeof action !== "object"
+        ) {
 
             return {
 
-                allowed: false,
+                valid: false,
 
-                reason: "INVALID_ACTION",
-
-                riskLevel: "CRITICAL"
+                reason: "INVALID_ACTION"
 
             };
 
         }
 
 
-        const permission =
-            action.permission || "NONE";
+        const fields = [
+            "dataSensitivity",
+            "externalEffect",
+            "reversibility",
+            "userImpact",
+            "scope"
+        ];
 
 
-        const dataSensitivity =
-            action.dataSensitivity || "PUBLIC";
+        for (const field of fields) {
+
+            const value =
+                action[field];
 
 
-        const externalEffect =
-            action.externalEffect || "NONE";
+            if (
+                !RiskEngine.VALUES[field]
+                .includes(value)
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        `INVALID_${field.toUpperCase()}`
+
+                };
+
+            }
+
+        }
 
 
-        const reversibility =
-            action.reversibility || "REVERSIBLE";
+        return {
+
+            valid: true,
+
+            reason: "VALID"
+
+        };
+
+    }
 
 
-        const userImpact =
-            action.userImpact || "LOW";
+    // --------------------------------------------------
+    // CALCULATE SCORE
+    // --------------------------------------------------
+
+    calculateScore(action) {
+
+        let score = 0;
 
 
-        const scope =
-            action.scope || "ONCE";
+        // Permission
 
+        if (
+            action.permission &&
+            action.permission !== "NONE"
+        ) {
 
-        // --------------------------------------------------
-        // CALCULATE RISK
-        // --------------------------------------------------
-
-        let riskScore = 0;
-
-
-        // Permission factor
-
-        if (permission !== "NONE") {
-
-            riskScore += 1;
+            score += 1;
 
         }
 
@@ -101,19 +166,19 @@ export class RiskEngine {
         // Data sensitivity
 
         if (
-            dataSensitivity === "PRIVATE"
+            action.dataSensitivity === "PRIVATE"
         ) {
 
-            riskScore += 1;
+            score += 1;
 
         }
 
 
         if (
-            dataSensitivity === "SENSITIVE"
+            action.dataSensitivity === "SENSITIVE"
         ) {
 
-            riskScore += 2;
+            score += 2;
 
         }
 
@@ -121,19 +186,19 @@ export class RiskEngine {
         // External effect
 
         if (
-            externalEffect === "DEVICE"
+            action.externalEffect === "DEVICE"
         ) {
 
-            riskScore += 1;
+            score += 1;
 
         }
 
 
         if (
-            externalEffect === "NETWORK"
+            action.externalEffect === "NETWORK"
         ) {
 
-            riskScore += 2;
+            score += 2;
 
         }
 
@@ -141,10 +206,10 @@ export class RiskEngine {
         // Reversibility
 
         if (
-            reversibility === "IRREVERSIBLE"
+            action.reversibility === "IRREVERSIBLE"
         ) {
 
-            riskScore += 2;
+            score += 2;
 
         }
 
@@ -152,19 +217,19 @@ export class RiskEngine {
         // User impact
 
         if (
-            userImpact === "MEDIUM"
+            action.userImpact === "MEDIUM"
         ) {
 
-            riskScore += 1;
+            score += 1;
 
         }
 
 
         if (
-            userImpact === "HIGH"
+            action.userImpact === "HIGH"
         ) {
 
-            riskScore += 2;
+            score += 2;
 
         }
 
@@ -172,95 +237,357 @@ export class RiskEngine {
         // Scope
 
         if (
-            scope === "SESSION"
+            action.scope === "SESSION"
         ) {
 
-            riskScore += 1;
+            score += 1;
 
         }
 
 
         if (
-            scope === "PERSISTENT"
+            action.scope === "PERSISTENT"
         ) {
 
-            riskScore += 2;
+            score += 2;
 
         }
 
 
-        // --------------------------------------------------
-        // DETERMINE RISK LEVEL
-        // --------------------------------------------------
+        return score;
 
-        let riskLevel;
+    }
 
 
-        if (riskScore <= 1) {
+    // --------------------------------------------------
+    // BASE CLASSIFICATION
+    // --------------------------------------------------
 
-            riskLevel = "LOW";
+    classifyScore(score) {
 
-        }
-        else if (riskScore <= 3) {
+        if (score <= 1) {
 
-            riskLevel = "MEDIUM";
-
-        }
-        else if (riskScore <= 6) {
-
-            riskLevel = "HIGH";
-
-        }
-        else {
-
-            riskLevel = "CRITICAL";
+            return "LOW";
 
         }
 
 
-        // --------------------------------------------------
-        // SECURITY REQUIREMENTS
-        // --------------------------------------------------
+        if (score <= 3) {
 
-        const requiresConfirmation =
-            riskLevel !== "LOW";
+            return "MEDIUM";
 
-
-        const requiresExplicitConfirmation =
-            riskLevel === "HIGH" ||
-            riskLevel === "CRITICAL";
+        }
 
 
-        const requiresAdditionalAuthentication =
-            riskLevel === "CRITICAL";
+        if (score <= 6) {
+
+            return "HIGH";
+
+        }
 
 
-        // --------------------------------------------------
-        // FINAL RESULT
-        // --------------------------------------------------
+        return "CRITICAL";
 
-        return {
+    }
+
+
+    // --------------------------------------------------
+    // RISK FLOOR
+    // --------------------------------------------------
+
+    applyRiskFloor(action, currentLevel) {
+
+        let level =
+            RiskEngine.LEVELS[currentLevel];
+
+
+        /*
+        ----------------------------------------------
+        SENSITIVE DATA + NETWORK
+
+        Cannot be below HIGH.
+        ----------------------------------------------
+        */
+
+        if (
+            action.dataSensitivity === "SENSITIVE" &&
+            action.externalEffect === "NETWORK"
+        ) {
+
+            level = Math.max(
+                level,
+                RiskEngine.LEVELS.HIGH
+            );
+
+        }
+
+
+        /*
+        ----------------------------------------------
+        IRREVERSIBLE ACTION
+
+        Cannot be below HIGH.
+        ----------------------------------------------
+        */
+
+        if (
+            action.reversibility === "IRREVERSIBLE"
+        ) {
+
+            level = Math.max(
+                level,
+                RiskEngine.LEVELS.HIGH
+            );
+
+        }
+
+
+        /*
+        ----------------------------------------------
+        IRREVERSIBLE + HIGH IMPACT
+
+        Must be CRITICAL.
+        ----------------------------------------------
+        */
+
+        if (
+            action.reversibility === "IRREVERSIBLE" &&
+            action.userImpact === "HIGH"
+        ) {
+
+            level = Math.max(
+                level,
+                RiskEngine.LEVELS.CRITICAL
+            );
+
+        }
+
+
+        /*
+        ----------------------------------------------
+        PERSISTENT + SENSITIVE
+
+        Must be at least HIGH.
+        ----------------------------------------------
+        */
+
+        if (
+            action.scope === "PERSISTENT" &&
+            action.dataSensitivity === "SENSITIVE"
+        ) {
+
+            level = Math.max(
+                level,
+                RiskEngine.LEVELS.HIGH
+            );
+
+        }
+
+
+        return Object.keys(
+            RiskEngine.LEVELS
+        ).find(
+            key =>
+                RiskEngine.LEVELS[key] === level
+        );
+
+    }
+
+
+    // --------------------------------------------------
+    // SECURITY REQUIREMENTS
+    // --------------------------------------------------
+
+    getRequirements(riskLevel) {
+
+        switch (riskLevel) {
+
+            case "LOW":
+
+                return {
+
+                    requiresConfirmation: false,
+
+                    requiresExplicitConfirmation: false,
+
+                    requiresAdditionalAuthentication: false,
+
+                    requiresAuditLog: true
+
+                };
+
+
+            case "MEDIUM":
+
+                return {
+
+                    requiresConfirmation: true,
+
+                    requiresExplicitConfirmation: false,
+
+                    requiresAdditionalAuthentication: false,
+
+                    requiresAuditLog: true
+
+                };
+
+
+            case "HIGH":
+
+                return {
+
+                    requiresConfirmation: true,
+
+                    requiresExplicitConfirmation: true,
+
+                    requiresAdditionalAuthentication: false,
+
+                    requiresAuditLog: true
+
+                };
+
+
+            case "CRITICAL":
+
+                return {
+
+                    requiresConfirmation: true,
+
+                    requiresExplicitConfirmation: true,
+
+                    requiresAdditionalAuthentication: true,
+
+                    requiresAuditLog: true
+
+                };
+
+
+            default:
+
+                return {
+
+                    requiresConfirmation: true,
+
+                    requiresExplicitConfirmation: true,
+
+                    requiresAdditionalAuthentication: true,
+
+                    requiresAuditLog: true
+
+                };
+
+        }
+
+    }
+
+
+    // --------------------------------------------------
+    // FULL EVALUATION
+    // --------------------------------------------------
+
+    evaluate(action) {
+
+        const validation =
+            this.validateAction(action);
+
+
+        /*
+        ----------------------------------------------
+        FAIL CLOSED
+
+        Invalid input becomes CRITICAL.
+        ----------------------------------------------
+        */
+
+        if (!validation.valid) {
+
+            return Object.freeze({
+
+                allowed: false,
+
+                action:
+                    action?.name ||
+                    "UNKNOWN_ACTION",
+
+                riskScore: null,
+
+                riskLevel: "CRITICAL",
+
+                reason:
+                    validation.reason,
+
+                requirements:
+                    this.getRequirements(
+                        "CRITICAL"
+                    ),
+
+                evaluatedAt:
+                    Date.now(),
+
+                engineVersion:
+                    this.version
+
+            });
+
+        }
+
+
+        const score =
+            this.calculateScore(action);
+
+
+        const baseLevel =
+            this.classifyScore(score);
+
+
+        const riskLevel =
+            this.applyRiskFloor(
+                action,
+                baseLevel
+            );
+
+
+        const requirements =
+            this.getRequirements(
+                riskLevel
+            );
+
+
+        /*
+        ----------------------------------------------
+        IMMUTABLE RESULT
+
+        The caller cannot directly modify
+        the evaluation result.
+        ----------------------------------------------
+        */
+
+        return Object.freeze({
 
             allowed: true,
 
             action:
-                action.name || "UNKNOWN_ACTION",
+                action.name ||
+                "UNKNOWN_ACTION",
 
-            permission,
+            permission:
+                action.permission ||
+                "NONE",
 
-            riskScore,
+            riskScore:
+                score,
 
-            riskLevel,
+            baseRiskLevel:
+                baseLevel,
 
-            requirements: {
+            riskLevel:
 
-                requiresConfirmation,
+                riskLevel,
 
-                requiresExplicitConfirmation,
-
-                requiresAdditionalAuthentication
-
-            },
+            requirements:
+                Object.freeze(
+                    requirements
+                ),
 
             evaluatedAt:
                 Date.now(),
@@ -268,7 +595,7 @@ export class RiskEngine {
             engineVersion:
                 this.version
 
-        };
+        });
 
     }
 
