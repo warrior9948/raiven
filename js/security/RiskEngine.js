@@ -1,43 +1,26 @@
-// RAIVEN Risk Engine v0.3
-// Stage A4.3
+// RAIVEN Risk Engine v0.4
+// Stage A4.4
 //
-// Risk Context & Action Classification
+// Security Requirement Escalation
 //
 // IMPORTANT:
 // RiskEngine NEVER grants permission.
 // RiskEngine NEVER executes actions.
-// RiskEngine ONLY evaluates and classifies risk.
-
+// RiskEngine ONLY evaluates risk
+// and determines required security controls.
 
 export class RiskEngine {
 
     constructor() {
-
-        this.version = "0.3";
-
+        this.version = "0.4";
     }
 
-
-    // ==================================================
-    // RISK LEVELS
-    // ==================================================
-
     static LEVELS = Object.freeze({
-
         LOW: 1,
-
         MEDIUM: 2,
-
         HIGH: 3,
-
         CRITICAL: 4
-
     });
-
-
-    // ==================================================
-    // ALLOWED VALUES
-    // ==================================================
 
     static VALUES = Object.freeze({
 
@@ -88,13 +71,8 @@ export class RiskEngine {
             "SINGLE",
             "CONTINUOUS"
         ]
-
     });
 
-
-    // ==================================================
-    // VALIDATE ACTION
-    // ==================================================
 
     validateAction(action) {
 
@@ -102,20 +80,13 @@ export class RiskEngine {
             !action ||
             typeof action !== "object"
         ) {
-
             return {
-
                 valid: false,
-
                 reason: "INVALID_ACTION"
-
             };
-
         }
 
-
         const requiredFields = [
-
             "dataSensitivity",
             "externalEffect",
             "reversibility",
@@ -124,9 +95,7 @@ export class RiskEngine {
             "actionType",
             "executionMode",
             "duration"
-
         ];
-
 
         for (
             const field of requiredFields
@@ -135,40 +104,24 @@ export class RiskEngine {
             const value =
                 action[field];
 
-
             if (
                 !RiskEngine.VALUES[field]
                     .includes(value)
             ) {
-
                 return {
-
                     valid: false,
-
                     reason:
                         `INVALID_${field.toUpperCase()}`
-
                 };
-
             }
-
         }
 
-
         return {
-
             valid: true,
-
             reason: "VALID"
-
         };
-
     }
 
-
-    // ==================================================
-    // CLASSIFY ACTION CONTEXT
-    // ==================================================
 
     classifyContext(action) {
 
@@ -191,257 +144,138 @@ export class RiskEngine {
 
             dataSensitivity:
                 action.dataSensitivity
-
         };
-
     }
 
-
-    // ==================================================
-    // CALCULATE SCORE
-    // ==================================================
 
     calculateScore(action) {
 
         let score = 0;
 
-
-        // ----------------------------------------------
-        // PERMISSION
-        // ----------------------------------------------
-
         if (
             action.permission &&
             action.permission !== "NONE"
         ) {
-
             score += 1;
-
         }
-
-
-        // ----------------------------------------------
-        // DATA SENSITIVITY
-        // ----------------------------------------------
 
         if (
             action.dataSensitivity === "PRIVATE"
         ) {
-
             score += 1;
-
         }
-
 
         if (
             action.dataSensitivity === "SENSITIVE"
         ) {
-
             score += 2;
-
         }
-
-
-        // ----------------------------------------------
-        // EXTERNAL EFFECT
-        // ----------------------------------------------
 
         if (
             action.externalEffect === "DEVICE"
         ) {
-
             score += 1;
-
         }
-
 
         if (
             action.externalEffect === "NETWORK"
         ) {
-
             score += 2;
-
         }
-
-
-        // ----------------------------------------------
-        // REVERSIBILITY
-        // ----------------------------------------------
 
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
-
             score += 2;
-
         }
-
-
-        // ----------------------------------------------
-        // USER IMPACT
-        // ----------------------------------------------
 
         if (
             action.userImpact === "MEDIUM"
         ) {
-
             score += 1;
-
         }
-
 
         if (
             action.userImpact === "HIGH"
         ) {
-
             score += 2;
-
         }
-
-
-        // ----------------------------------------------
-        // SCOPE
-        // ----------------------------------------------
 
         if (
             action.scope === "SESSION"
         ) {
-
             score += 1;
-
         }
-
 
         if (
             action.scope === "PERSISTENT"
         ) {
-
             score += 2;
-
         }
-
-
-        // ----------------------------------------------
-        // ACTION TYPE
-        // ----------------------------------------------
 
         if (
             action.actionType === "WRITE"
         ) {
-
             score += 1;
-
         }
-
 
         if (
             action.actionType === "CAPTURE"
         ) {
-
             score += 1;
-
         }
-
 
         if (
             action.actionType === "TRANSMIT"
         ) {
-
             score += 2;
-
         }
-
 
         if (
             action.actionType === "DELETE"
         ) {
-
             score += 2;
-
         }
-
 
         if (
             action.actionType === "EXECUTE"
         ) {
-
             score += 2;
-
         }
-
-
-        // ----------------------------------------------
-        // REMOTE EXECUTION
-        // ----------------------------------------------
 
         if (
             action.executionMode === "REMOTE"
         ) {
-
             score += 1;
-
         }
-
-
-        // ----------------------------------------------
-        // CONTINUOUS EXECUTION
-        // ----------------------------------------------
 
         if (
             action.duration === "CONTINUOUS"
         ) {
-
             score += 1;
-
         }
 
-
         return score;
-
     }
 
-
-    // ==================================================
-    // BASE CLASSIFICATION
-    // ==================================================
 
     classifyScore(score) {
 
-        if (
-            score <= 1
-        ) {
-
+        if (score <= 1) {
             return "LOW";
-
         }
 
-
-        if (
-            score <= 3
-        ) {
-
+        if (score <= 3) {
             return "MEDIUM";
-
         }
 
-
-        if (
-            score <= 6
-        ) {
-
+        if (score <= 6) {
             return "HIGH";
-
         }
-
 
         return "CRITICAL";
-
     }
 
-
-    // ==================================================
-    // RISK FLOORS
-    // ==================================================
 
     applyRiskFloor(
         action,
@@ -453,242 +287,313 @@ export class RiskEngine {
                 currentLevel
             ];
 
-
-        // Sensitive + Network
         if (
             action.dataSensitivity === "SENSITIVE" &&
             action.externalEffect === "NETWORK"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.HIGH
-
             );
-
         }
 
-
-        // Irreversible
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.HIGH
-
             );
-
         }
 
-
-        // Irreversible + High impact
         if (
             action.reversibility === "IRREVERSIBLE" &&
             action.userImpact === "HIGH"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.CRITICAL
-
             );
-
         }
 
-
-        // Persistent + Sensitive
         if (
             action.scope === "PERSISTENT" &&
             action.dataSensitivity === "SENSITIVE"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.HIGH
-
             );
-
         }
 
-
-        // Delete
         if (
             action.actionType === "DELETE"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.HIGH
-
             );
-
         }
 
-
-        // Execute remotely
         if (
             action.actionType === "EXECUTE" &&
             action.executionMode === "REMOTE"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.HIGH
-
             );
-
         }
 
-
-        // Sensitive continuous access
         if (
             action.dataSensitivity === "SENSITIVE" &&
             action.duration === "CONTINUOUS"
         ) {
-
             level = Math.max(
-
                 level,
-
                 RiskEngine.LEVELS.HIGH
-
             );
-
         }
-
 
         return Object.keys(
             RiskEngine.LEVELS
         ).find(
-
             key =>
                 RiskEngine.LEVELS[key] === level
-
         );
-
     }
 
 
-    // ==================================================
-    // SECURITY REQUIREMENTS
-    // ==================================================
+    /*
+     * A4.4
+     *
+     * Determines the security controls
+     * required before an action may proceed.
+     *
+     * This method DOES NOT enforce them.
+     */
 
-    getRequirements(riskLevel) {
+    getRequirements(
+        riskLevel,
+        action
+    ) {
 
-        switch (riskLevel) {
+        const requirements = {
 
-            case "LOW":
+            requiresConfirmation: false,
 
-                return {
+            requiresExplicitConfirmation: false,
 
-                    requiresConfirmation: false,
+            requiresAdditionalAuthentication: false,
 
-                    requiresExplicitConfirmation: false,
+            requiresAuditLog: true,
 
-                    requiresAdditionalAuthentication: false,
+            requiresIsolation: false,
 
-                    requiresAuditLog: true
+            requiresPreExecutionReview: false,
 
-                };
-
-
-            case "MEDIUM":
-
-                return {
-
-                    requiresConfirmation: true,
-
-                    requiresExplicitConfirmation: false,
-
-                    requiresAdditionalAuthentication: false,
-
-                    requiresAuditLog: true
-
-                };
+            requiresEmergencyProtection: false
+        };
 
 
-            case "HIGH":
+        /*
+         * Risk-level requirements
+         */
 
-                return {
+        if (
+            riskLevel === "MEDIUM"
+        ) {
 
-                    requiresConfirmation: true,
-
-                    requiresExplicitConfirmation: true,
-
-                    requiresAdditionalAuthentication: false,
-
-                    requiresAuditLog: true
-
-                };
-
-
-            case "CRITICAL":
-
-                return {
-
-                    requiresConfirmation: true,
-
-                    requiresExplicitConfirmation: true,
-
-                    requiresAdditionalAuthentication: true,
-
-                    requiresAuditLog: true
-
-                };
-
-
-            default:
-
-                return {
-
-                    requiresConfirmation: true,
-
-                    requiresExplicitConfirmation: true,
-
-                    requiresAdditionalAuthentication: true,
-
-                    requiresAuditLog: true
-
-                };
-
+            requirements
+                .requiresConfirmation = true;
         }
 
+
+        if (
+            riskLevel === "HIGH"
+        ) {
+
+            requirements
+                .requiresConfirmation = true;
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+
+            requirements
+                .requiresEmergencyProtection = true;
+        }
+
+
+        if (
+            riskLevel === "CRITICAL"
+        ) {
+
+            requirements
+                .requiresConfirmation = true;
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresAdditionalAuthentication = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+
+            requirements
+                .requiresIsolation = true;
+
+            requirements
+                .requiresEmergencyProtection = true;
+        }
+
+
+        /*
+         * Context-aware escalation
+         */
+
+        if (
+            action
+                .actionType === "EXECUTE" &&
+            action
+                .executionMode === "REMOTE"
+        ) {
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+
+            requirements
+                .requiresEmergencyProtection = true;
+        }
+
+
+        if (
+            action
+                .actionType === "DELETE"
+        ) {
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+
+            requirements
+                .requiresEmergencyProtection = true;
+        }
+
+
+        if (
+            action
+                .dataSensitivity === "SENSITIVE" &&
+            action
+                .duration === "CONTINUOUS"
+        ) {
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresAdditionalAuthentication = true;
+
+            requirements
+                .requiresIsolation = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+
+            requirements
+                .requiresEmergencyProtection = true;
+        }
+
+
+        if (
+            action
+                .externalEffect === "NETWORK" &&
+            action
+                .actionType === "TRANSMIT"
+        ) {
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+        }
+
+
+        /*
+         * Final safety rule:
+         *
+         * Any CRITICAL action must have
+         * every security control enabled.
+         */
+
+        if (
+            riskLevel === "CRITICAL"
+        ) {
+
+            requirements
+                .requiresConfirmation = true;
+
+            requirements
+                .requiresExplicitConfirmation = true;
+
+            requirements
+                .requiresAdditionalAuthentication = true;
+
+            requirements
+                .requiresAuditLog = true;
+
+            requirements
+                .requiresIsolation = true;
+
+            requirements
+                .requiresPreExecutionReview = true;
+
+            requirements
+                .requiresEmergencyProtection = true;
+        }
+
+
+        return requirements;
     }
 
-
-    // ==================================================
-    // FULL EVALUATION
-    // ==================================================
 
     evaluate(action) {
 
         const validation =
-            this.validateAction(
-                action
-            );
+            this.validateAction(action);
 
 
-        // ----------------------------------------------
-        // FAIL CLOSED
-        // ----------------------------------------------
+        /*
+         * FAIL CLOSED
+         */
 
         if (
             !validation.valid
         ) {
+
+            const criticalRequirements =
+                this.getRequirements(
+                    "CRITICAL",
+                    {
+                        actionType: "EXECUTE",
+                        executionMode: "REMOTE",
+                        duration: "SINGLE",
+                        dataSensitivity: "SENSITIVE",
+                        externalEffect: "NETWORK",
+                        reversibility: "IRREVERSIBLE",
+                        userImpact: "HIGH",
+                        scope: "PERSISTENT"
+                    }
+                );
 
             return Object.freeze({
 
@@ -707,8 +612,8 @@ export class RiskEngine {
                     validation.reason,
 
                 requirements:
-                    this.getRequirements(
-                        "CRITICAL"
+                    Object.freeze(
+                        criticalRequirements
                     ),
 
                 evaluatedAt:
@@ -716,15 +621,9 @@ export class RiskEngine {
 
                 engineVersion:
                     this.version
-
             });
-
         }
 
-
-        // ----------------------------------------------
-        // CONTEXT
-        // ----------------------------------------------
 
         const context =
             this.classifyContext(
@@ -732,19 +631,11 @@ export class RiskEngine {
             );
 
 
-        // ----------------------------------------------
-        // SCORE
-        // ----------------------------------------------
-
         const score =
             this.calculateScore(
                 action
             );
 
-
-        // ----------------------------------------------
-        // BASE LEVEL
-        // ----------------------------------------------
 
         const baseLevel =
             this.classifyScore(
@@ -752,33 +643,19 @@ export class RiskEngine {
             );
 
 
-        // ----------------------------------------------
-        // FINAL LEVEL
-        // ----------------------------------------------
-
         const riskLevel =
             this.applyRiskFloor(
-
                 action,
-
                 baseLevel
-
             );
 
-
-        // ----------------------------------------------
-        // REQUIREMENTS
-        // ----------------------------------------------
 
         const requirements =
             this.getRequirements(
-                riskLevel
+                riskLevel,
+                action
             );
 
-
-        // ----------------------------------------------
-        // IMMUTABLE RESULT
-        // ----------------------------------------------
 
         return Object.freeze({
 
@@ -816,9 +693,6 @@ export class RiskEngine {
 
             engineVersion:
                 this.version
-
         });
-
     }
-
 }
