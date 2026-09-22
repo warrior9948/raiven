@@ -1,19 +1,20 @@
-// RAIVEN Risk Engine v0.5
-// Stage A4.5
+// RAIVEN Risk Engine v0.6
+// Stage A4.6
 //
-// Risk Decision Consistency
+// Risk Decision Integrity
 //
 // IMPORTANT:
 // RiskEngine NEVER grants permission.
 // RiskEngine NEVER executes actions.
 // RiskEngine ONLY evaluates risk,
 // determines security requirements,
-// and verifies requirement consistency.
+// verifies requirement consistency,
+// and protects decision integrity.
 
 export class RiskEngine {
 
     constructor() {
-        this.version = "0.5";
+        this.version = "0.6";
     }
 
     static LEVELS = Object.freeze({
@@ -74,35 +75,21 @@ export class RiskEngine {
         ]
     });
 
-
-    /*
-     * A4.5
-     *
-     * Security controls ordered from
-     * weakest to strongest.
-     *
-     * A stronger risk level must never
-     * lose a control required by a
-     * weaker risk level.
-     */
-
     static REQUIREMENT_ORDER = Object.freeze({
-
         requiresConfirmation: 1,
-
         requiresExplicitConfirmation: 2,
-
         requiresAdditionalAuthentication: 3,
-
         requiresAuditLog: 1,
-
         requiresIsolation: 4,
-
         requiresPreExecutionReview: 3,
-
         requiresEmergencyProtection: 3
     });
 
+
+    /*
+     * A4.1–A4.5
+     * ACTION VALIDATION
+     */
 
     validateAction(action) {
 
@@ -154,6 +141,10 @@ export class RiskEngine {
     }
 
 
+    /*
+     * ACTION CONTEXT
+     */
+
     classifyContext(action) {
 
         return {
@@ -178,6 +169,10 @@ export class RiskEngine {
         };
     }
 
+
+    /*
+     * RISK SCORE
+     */
 
     calculateScore(action) {
 
@@ -308,6 +303,10 @@ export class RiskEngine {
     }
 
 
+    /*
+     * RISK FLOORS
+     */
+
     applyRiskFloor(
         action,
         currentLevel
@@ -322,7 +321,6 @@ export class RiskEngine {
             action.dataSensitivity === "SENSITIVE" &&
             action.externalEffect === "NETWORK"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -332,7 +330,6 @@ export class RiskEngine {
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -343,7 +340,6 @@ export class RiskEngine {
             action.reversibility === "IRREVERSIBLE" &&
             action.userImpact === "HIGH"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.CRITICAL
@@ -354,7 +350,6 @@ export class RiskEngine {
             action.scope === "PERSISTENT" &&
             action.dataSensitivity === "SENSITIVE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -364,7 +359,6 @@ export class RiskEngine {
         if (
             action.actionType === "DELETE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -375,7 +369,6 @@ export class RiskEngine {
             action.actionType === "EXECUTE" &&
             action.executionMode === "REMOTE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -386,7 +379,6 @@ export class RiskEngine {
             action.dataSensitivity === "SENSITIVE" &&
             action.duration === "CONTINUOUS"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -403,12 +395,7 @@ export class RiskEngine {
 
 
     /*
-     * A4.4
-     *
-     * Determines required security
-     * controls.
-     *
-     * DOES NOT enforce them.
+     * SECURITY REQUIREMENTS
      */
 
     getRequirements(
@@ -490,6 +477,7 @@ export class RiskEngine {
          */
 
         if (
+            action &&
             action.actionType === "EXECUTE" &&
             action.executionMode === "REMOTE"
         ) {
@@ -506,6 +494,7 @@ export class RiskEngine {
 
 
         if (
+            action &&
             action.actionType === "DELETE"
         ) {
 
@@ -521,6 +510,7 @@ export class RiskEngine {
 
 
         if (
+            action &&
             action.dataSensitivity === "SENSITIVE" &&
             action.duration === "CONTINUOUS"
         ) {
@@ -543,6 +533,7 @@ export class RiskEngine {
 
 
         if (
+            action &&
             action.externalEffect === "NETWORK" &&
             action.actionType === "TRANSMIT"
         ) {
@@ -556,7 +547,7 @@ export class RiskEngine {
 
 
         /*
-         * CRITICAL safety invariant
+         * CRITICAL = ALL PROTECTIONS
          */
 
         if (
@@ -592,9 +583,7 @@ export class RiskEngine {
 
     /*
      * A4.5
-     *
-     * Converts a requirement set into
-     * a comparable security profile.
+     * REQUIREMENT VALIDATION
      */
 
     getRequirementLevel(
@@ -611,13 +600,6 @@ export class RiskEngine {
     }
 
 
-    /*
-     * A4.5
-     *
-     * Checks whether every required
-     * security control is present.
-     */
-
     validateRequirementSet(
         requirements
     ) {
@@ -629,26 +611,36 @@ export class RiskEngine {
 
             return {
                 valid: false,
-                reason: "INVALID_REQUIREMENTS"
+                reason:
+                    "INVALID_REQUIREMENTS"
             };
         }
 
         const fields = [
+
             "requiresConfirmation",
+
             "requiresExplicitConfirmation",
+
             "requiresAdditionalAuthentication",
+
             "requiresAuditLog",
+
             "requiresIsolation",
+
             "requiresPreExecutionReview",
+
             "requiresEmergencyProtection"
         ];
+
 
         for (
             const field of fields
         ) {
 
             if (
-                typeof requirements[field] !== "boolean"
+                typeof requirements[field] !==
+                "boolean"
             ) {
 
                 return {
@@ -659,14 +651,12 @@ export class RiskEngine {
             }
         }
 
-        /*
-         * Explicit confirmation logically
-         * requires ordinary confirmation.
-         */
 
         if (
-            requirements.requiresExplicitConfirmation &&
-            !requirements.requiresConfirmation
+            requirements
+                .requiresExplicitConfirmation &&
+            !requirements
+                .requiresConfirmation
         ) {
 
             return {
@@ -676,15 +666,12 @@ export class RiskEngine {
             };
         }
 
-        /*
-         * Additional authentication is
-         * only meaningful when confirmation
-         * exists.
-         */
 
         if (
-            requirements.requiresAdditionalAuthentication &&
-            !requirements.requiresConfirmation
+            requirements
+                .requiresAdditionalAuthentication &&
+            !requirements
+                .requiresConfirmation
         ) {
 
             return {
@@ -694,14 +681,12 @@ export class RiskEngine {
             };
         }
 
-        /*
-         * Isolation requires pre-execution
-         * review.
-         */
 
         if (
-            requirements.requiresIsolation &&
-            !requirements.requiresPreExecutionReview
+            requirements
+                .requiresIsolation &&
+            !requirements
+                .requiresPreExecutionReview
         ) {
 
             return {
@@ -711,14 +696,12 @@ export class RiskEngine {
             };
         }
 
-        /*
-         * Emergency protection must always
-         * have an audit trail.
-         */
 
         if (
-            requirements.requiresEmergencyProtection &&
-            !requirements.requiresAuditLog
+            requirements
+                .requiresEmergencyProtection &&
+            !requirements
+                .requiresAuditLog
         ) {
 
             return {
@@ -728,21 +711,14 @@ export class RiskEngine {
             };
         }
 
+
         return {
             valid: true,
-            reason: "VALID_REQUIREMENTS"
+            reason:
+                "VALID_REQUIREMENTS"
         };
     }
 
-
-    /*
-     * A4.5
-     *
-     * Compares two requirement sets.
-     *
-     * Returns false if the higher-risk
-     * requirement set loses a protection.
-     */
 
     compareRequirements(
         lowerRequirements,
@@ -759,6 +735,7 @@ export class RiskEngine {
                 higherRequirements
             );
 
+
         if (
             !validationLow.valid ||
             !validationHigh.valid
@@ -766,19 +743,29 @@ export class RiskEngine {
 
             return {
                 consistent: false,
-                reason: "INVALID_REQUIREMENT_SET"
+                reason:
+                    "INVALID_REQUIREMENT_SET"
             };
         }
 
+
         const fields = [
+
             "requiresConfirmation",
+
             "requiresExplicitConfirmation",
+
             "requiresAdditionalAuthentication",
+
             "requiresAuditLog",
+
             "requiresIsolation",
+
             "requiresPreExecutionReview",
+
             "requiresEmergencyProtection"
         ];
+
 
         for (
             const field of fields
@@ -794,6 +781,7 @@ export class RiskEngine {
                     higherRequirements[field]
                 );
 
+
             if (
                 higher < lower
             ) {
@@ -807,31 +795,31 @@ export class RiskEngine {
             }
         }
 
+
         return {
             consistent: true,
-            reason: "CONSISTENT"
+            reason:
+                "CONSISTENT"
         };
     }
 
 
-    /*
-     * A4.5
-     *
-     * Verifies that the complete
-     * LOW → MEDIUM → HIGH → CRITICAL
-     * security progression is monotonic.
-     */
-
     validateRequirementMonotonicity() {
 
         const levels = [
+
             "LOW",
+
             "MEDIUM",
+
             "HIGH",
+
             "CRITICAL"
         ];
 
+
         const profiles = {};
+
 
         const baseAction = {
 
@@ -852,6 +840,7 @@ export class RiskEngine {
             scope: "ONCE"
         };
 
+
         for (
             const level of levels
         ) {
@@ -862,6 +851,7 @@ export class RiskEngine {
                     baseAction
                 );
         }
+
 
         for (
             let i = 0;
@@ -875,11 +865,13 @@ export class RiskEngine {
             const higher =
                 levels[i + 1];
 
+
             const comparison =
                 this.compareRequirements(
                     profiles[lower],
                     profiles[higher]
                 );
+
 
             if (
                 !comparison.consistent
@@ -887,14 +879,10 @@ export class RiskEngine {
 
                 return {
                     valid: false,
-
                     reason:
                         comparison.reason,
-
                     lower,
-
                     higher,
-
                     field:
                         comparison.field ||
                         null
@@ -902,19 +890,385 @@ export class RiskEngine {
             }
         }
 
+
         return {
+
             valid: true,
+
             reason:
                 "REQUIREMENT_MONOTONICITY_VALID",
+
             profiles
         };
     }
 
 
+    /*
+     * ==================================================
+     * A4.6
+     * RISK DECISION INTEGRITY
+     * ==================================================
+     *
+     * The fingerprint is a deterministic representation
+     * of the security-relevant decision fields.
+     *
+     * This is tamper DETECTION.
+     *
+     * It is NOT a cryptographic signature.
+     *
+     * Browser-side JavaScript cannot provide a
+     * trustworthy cryptographic authority against
+     * someone who can modify the application itself.
+     */
+
+
+    createDecisionId() {
+
+        return (
+
+            "RD-" +
+
+            Date.now().toString(36) +
+
+            "-" +
+
+            Math.random()
+                .toString(36)
+                .slice(2, 10)
+
+        ).toUpperCase();
+    }
+
+
+    createDecisionFingerprint(
+        decision
+    ) {
+
+        if (
+            !decision ||
+            typeof decision !== "object"
+        ) {
+
+            return null;
+        }
+
+
+        const integrityData = {
+
+            action:
+                decision.action ||
+                null,
+
+            permission:
+                decision.permission ||
+                "NONE",
+
+            riskScore:
+                decision.riskScore ??
+                null,
+
+            baseRiskLevel:
+                decision.baseRiskLevel ||
+                null,
+
+            riskLevel:
+                decision.riskLevel ||
+                null,
+
+            context:
+                decision.context ||
+                null,
+
+            requirements:
+                decision.requirements ||
+                null
+        };
+
+
+        const serialized =
+            JSON.stringify(
+                integrityData
+            );
+
+
+        /*
+         * Deterministic non-cryptographic hash.
+         */
+
+        let hash = 2166136261;
+
+
+        for (
+            let i = 0;
+            i < serialized.length;
+            i++
+        ) {
+
+            hash ^=
+                serialized.charCodeAt(i);
+
+            hash +=
+                (hash << 1) +
+                (hash << 4) +
+                (hash << 7) +
+                (hash << 8) +
+                (hash << 24);
+        }
+
+
+        hash =
+            hash >>> 0;
+
+
+        return (
+            "RI-" +
+            hash
+                .toString(16)
+                .padStart(8, "0")
+                .toUpperCase()
+        );
+    }
+
+
+    attachDecisionIntegrity(
+        decision
+    ) {
+
+        if (
+            !decision ||
+            typeof decision !== "object"
+        ) {
+
+            return null;
+        }
+
+
+        const decisionId =
+            this.createDecisionId();
+
+
+        const decisionWithId = {
+
+            ...decision,
+
+            decisionId
+        };
+
+
+        const fingerprint =
+            this.createDecisionFingerprint(
+                decisionWithId
+            );
+
+
+        return Object.freeze({
+
+            ...decisionWithId,
+
+            integrity:
+                Object.freeze({
+
+                    decisionId,
+
+                    fingerprint,
+
+                    valid: true,
+
+                    method:
+                        "DETERMINISTIC_TAMPER_DETECTION",
+
+                    integrityVersion:
+                        "0.1"
+                })
+        });
+    }
+
+
+    verifyDecisionIntegrity(
+        decision
+    ) {
+
+        if (
+            !decision ||
+            typeof decision !== "object"
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_DECISION"
+            };
+        }
+
+
+        if (
+            !decision.integrity ||
+            typeof decision.integrity !==
+            "object"
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INTEGRITY_DATA_MISSING"
+            };
+        }
+
+
+        if (
+            !decision.integrity.decisionId ||
+            !decision.integrity.fingerprint
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INTEGRITY_DATA_INCOMPLETE"
+            };
+        }
+
+
+        if (
+            decision.decisionId !==
+            decision.integrity.decisionId
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "DECISION_ID_MISMATCH"
+            };
+        }
+
+
+        const recalculatedFingerprint =
+            this.createDecisionFingerprint(
+                decision
+            );
+
+
+        if (
+            recalculatedFingerprint !==
+            decision.integrity.fingerprint
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "DECISION_TAMPER_DETECTED",
+
+                expected:
+                    decision.integrity.fingerprint,
+
+                actual:
+                    recalculatedFingerprint
+            };
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "DECISION_INTEGRITY_VALID",
+
+            decisionId:
+                decision.decisionId,
+
+            fingerprint:
+                recalculatedFingerprint
+        };
+    }
+
+
+    /*
+     * A4.6 FAIL-CLOSED INTEGRITY CHECK
+     */
+
+    enforceDecisionIntegrity(
+        decision
+    ) {
+
+        const verification =
+            this.verifyDecisionIntegrity(
+                decision
+            );
+
+
+        if (
+            !verification.valid
+        ) {
+
+            return Object.freeze({
+
+                allowed: false,
+
+                trusted: false,
+
+                reason:
+                    "DECISION_INTEGRITY_FAILURE",
+
+                integrity:
+                    Object.freeze(
+                        verification
+                    ),
+
+                evaluatedAt:
+                    Date.now(),
+
+                engineVersion:
+                    this.version
+            });
+        }
+
+
+        return Object.freeze({
+
+            allowed:
+                decision.allowed === true,
+
+            trusted: true,
+
+            reason:
+                "DECISION_INTEGRITY_VALID",
+
+            decisionId:
+                verification.decisionId,
+
+            fingerprint:
+                verification.fingerprint,
+
+            integrity:
+                Object.freeze(
+                    verification
+                )
+        });
+    }
+
+
+    /*
+     * ==================================================
+     * EVALUATE
+     * ==================================================
+     */
+
     evaluate(action) {
 
         const validation =
-            this.validateAction(action);
+            this.validateAction(
+                action
+            );
 
 
         /*
@@ -940,40 +1294,49 @@ export class RiskEngine {
                     }
                 );
 
-            return Object.freeze({
 
-                allowed: false,
+            const failClosedDecision =
+                {
 
-                action:
-                    action?.name ||
-                    "UNKNOWN_ACTION",
+                    allowed: false,
 
-                riskScore: null,
+                    action:
+                        action?.name ||
+                        "UNKNOWN_ACTION",
 
-                riskLevel:
-                    "CRITICAL",
+                    riskScore: null,
 
-                reason:
-                    validation.reason,
+                    riskLevel:
+                        "CRITICAL",
 
-                requirements:
-                    Object.freeze(
-                        criticalRequirements
-                    ),
+                    reason:
+                        validation.reason,
 
-                consistency:
-                    Object.freeze({
-                        valid: true,
-                        reason:
-                            "FAIL_CLOSED_CRITICAL"
-                    }),
+                    requirements:
+                        Object.freeze(
+                            criticalRequirements
+                        ),
 
-                evaluatedAt:
-                    Date.now(),
+                    consistency:
+                        Object.freeze({
 
-                engineVersion:
-                    this.version
-            });
+                            valid: true,
+
+                            reason:
+                                "FAIL_CLOSED_CRITICAL"
+                        }),
+
+                    evaluatedAt:
+                        Date.now(),
+
+                    engineVersion:
+                        this.version
+                };
+
+
+            return this.attachDecisionIntegrity(
+                failClosedDecision
+            );
         }
 
 
@@ -1009,10 +1372,6 @@ export class RiskEngine {
             );
 
 
-        /*
-         * A4.5 consistency validation
-         */
-
         const requirementValidation =
             this.validateRequirementSet(
                 requirements
@@ -1020,56 +1379,65 @@ export class RiskEngine {
 
 
         /*
-         * If the engine generates an
-         * internally inconsistent security
-         * profile, fail closed.
+         * Requirement inconsistency
+         * also fails closed.
          */
 
         if (
             !requirementValidation.valid
         ) {
 
-            return Object.freeze({
-
-                allowed: false,
-
-                action:
-                    action.name ||
-                    "UNKNOWN_ACTION",
-
-                riskScore:
-                    score,
-
-                baseRiskLevel:
-                    baseLevel,
-
-                riskLevel:
+            const criticalRequirements =
+                this.getRequirements(
                     "CRITICAL",
+                    action
+                );
 
-                reason:
-                    "SECURITY_REQUIREMENT_INCONSISTENCY",
 
-                requirementError:
-                    requirementValidation.reason,
+            const inconsistentDecision =
+                {
 
-                requirements:
-                    Object.freeze(
-                        this.getRequirements(
-                            "CRITICAL",
-                            action
-                        )
-                    ),
+                    allowed: false,
 
-                evaluatedAt:
-                    Date.now(),
+                    action:
+                        action.name ||
+                        "UNKNOWN_ACTION",
 
-                engineVersion:
-                    this.version
-            });
+                    riskScore:
+                        score,
+
+                    baseRiskLevel:
+                        baseLevel,
+
+                    riskLevel:
+                        "CRITICAL",
+
+                    reason:
+                        "SECURITY_REQUIREMENT_INCONSISTENCY",
+
+                    requirementError:
+                        requirementValidation.reason,
+
+                    requirements:
+                        Object.freeze(
+                            criticalRequirements
+                        ),
+
+                    evaluatedAt:
+                        Date.now(),
+
+                    engineVersion:
+                        this.version
+                };
+
+
+            return this.attachDecisionIntegrity(
+                inconsistentDecision
+            );
         }
 
 
-        return Object.freeze({
+        const decision = {
 
             allowed: true,
 
@@ -1102,7 +1470,9 @@ export class RiskEngine {
 
             consistency:
                 Object.freeze({
+
                     valid: true,
+
                     reason:
                         "SECURITY_REQUIREMENTS_CONSISTENT"
                 }),
@@ -1112,6 +1482,16 @@ export class RiskEngine {
 
             engineVersion:
                 this.version
-        });
+        };
+
+
+        /*
+         * A4.6 integrity is attached
+         * after the complete decision exists.
+         */
+
+        return this.attachDecisionIntegrity(
+            decision
+        );
     }
 }
