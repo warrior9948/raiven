@@ -1,36 +1,60 @@
-// RAIVEN Risk Engine v0.7.1
-// Stage A4.7
+// =========================================================
+// RAIVEN Risk Engine v0.8.0
+// Stage A4.8
 //
-// A4.3 Risk Context
+// A4.3 Risk Context & Scoring
 // A4.4 Security Requirements
 // A4.5 Risk Decision Consistency
 // A4.6 Risk Decision Integrity
 // A4.7 Risk Decision Determinism
+// A4.8 Risk Consistency & Determinism
 //
 // IMPORTANT:
+//
 // RiskEngine NEVER grants permission.
 // RiskEngine NEVER executes actions.
-// RiskEngine ONLY evaluates risk,
-// determines security requirements,
-// produces decision traces,
-// verifies decision integrity,
-// and verifies deterministic behavior.
+// RiskEngine ONLY:
+//
+// - evaluates risk
+// - determines security requirements
+// - produces decision traces
+// - verifies decision integrity
+// - verifies deterministic behavior
+// - verifies consistency
+//
+// RiskEngine cannot grant itself authority.
+// =========================================================
+
 
 export class RiskEngine {
 
     constructor() {
-        this.version = "0.7.1";
+
+        this.version = "0.8.0";
+
         this._decisionCounter = 0;
     }
 
 
+    // =========================================================
+    // RISK LEVELS
+    // =========================================================
+
     static LEVELS = Object.freeze({
+
         LOW: 1,
+
         MEDIUM: 2,
+
         HIGH: 3,
+
         CRITICAL: 4
     });
 
+
+    // =========================================================
+    // VALID ENUMERATIONS
+    // =========================================================
 
     static VALUES = Object.freeze({
 
@@ -95,35 +119,52 @@ export class RiskEngine {
             typeof action !== "object" ||
             Array.isArray(action)
         ) {
+
             return {
+
                 valid: false,
-                reason: "INVALID_ACTION"
+
+                reason:
+                    "INVALID_ACTION"
             };
         }
 
 
         const requiredFields = [
+
             "dataSensitivity",
+
             "externalEffect",
+
             "reversibility",
+
             "userImpact",
+
             "scope",
+
             "actionType",
+
             "executionMode",
+
             "duration"
         ];
 
 
         for (const field of requiredFields) {
 
-            const value = action[field];
+            const value =
+                action[field];
+
 
             if (
                 !RiskEngine.VALUES[field] ||
                 !RiskEngine.VALUES[field].includes(value)
             ) {
+
                 return {
+
                     valid: false,
+
                     reason:
                         `INVALID_${field.toUpperCase()}`
                 };
@@ -132,8 +173,11 @@ export class RiskEngine {
 
 
         return {
+
             valid: true,
-            reason: "VALID"
+
+            reason:
+                "VALID"
         };
     }
 
@@ -180,6 +224,7 @@ export class RiskEngine {
             action.permission &&
             action.permission !== "NONE"
         ) {
+
             score += 1;
         }
 
@@ -187,6 +232,7 @@ export class RiskEngine {
         if (
             action.dataSensitivity === "PRIVATE"
         ) {
+
             score += 1;
         }
 
@@ -194,6 +240,7 @@ export class RiskEngine {
         if (
             action.dataSensitivity === "SENSITIVE"
         ) {
+
             score += 2;
         }
 
@@ -201,6 +248,7 @@ export class RiskEngine {
         if (
             action.externalEffect === "DEVICE"
         ) {
+
             score += 1;
         }
 
@@ -208,6 +256,7 @@ export class RiskEngine {
         if (
             action.externalEffect === "NETWORK"
         ) {
+
             score += 2;
         }
 
@@ -215,6 +264,7 @@ export class RiskEngine {
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
+
             score += 2;
         }
 
@@ -222,6 +272,7 @@ export class RiskEngine {
         if (
             action.userImpact === "MEDIUM"
         ) {
+
             score += 1;
         }
 
@@ -229,6 +280,7 @@ export class RiskEngine {
         if (
             action.userImpact === "HIGH"
         ) {
+
             score += 2;
         }
 
@@ -236,6 +288,7 @@ export class RiskEngine {
         if (
             action.scope === "SESSION"
         ) {
+
             score += 1;
         }
 
@@ -243,6 +296,7 @@ export class RiskEngine {
         if (
             action.scope === "PERSISTENT"
         ) {
+
             score += 2;
         }
 
@@ -250,6 +304,7 @@ export class RiskEngine {
         if (
             action.actionType === "WRITE"
         ) {
+
             score += 1;
         }
 
@@ -257,6 +312,7 @@ export class RiskEngine {
         if (
             action.actionType === "CAPTURE"
         ) {
+
             score += 1;
         }
 
@@ -264,6 +320,7 @@ export class RiskEngine {
         if (
             action.actionType === "TRANSMIT"
         ) {
+
             score += 2;
         }
 
@@ -271,6 +328,7 @@ export class RiskEngine {
         if (
             action.actionType === "DELETE"
         ) {
+
             score += 2;
         }
 
@@ -278,6 +336,7 @@ export class RiskEngine {
         if (
             action.actionType === "EXECUTE"
         ) {
+
             score += 2;
         }
 
@@ -285,6 +344,7 @@ export class RiskEngine {
         if (
             action.executionMode === "REMOTE"
         ) {
+
             score += 1;
         }
 
@@ -292,6 +352,7 @@ export class RiskEngine {
         if (
             action.duration === "CONTINUOUS"
         ) {
+
             score += 1;
         }
 
@@ -309,11 +370,14 @@ export class RiskEngine {
         if (score <= 1)
             return "LOW";
 
+
         if (score <= 3)
             return "MEDIUM";
 
+
         if (score <= 6)
             return "HIGH";
+
 
         return "CRITICAL";
     }
@@ -333,6 +397,7 @@ export class RiskEngine {
             action.dataSensitivity === "SENSITIVE" &&
             action.externalEffect === "NETWORK"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -343,6 +408,7 @@ export class RiskEngine {
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -354,6 +420,7 @@ export class RiskEngine {
             action.reversibility === "IRREVERSIBLE" &&
             action.userImpact === "HIGH"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.CRITICAL
@@ -365,6 +432,7 @@ export class RiskEngine {
             action.scope === "PERSISTENT" &&
             action.dataSensitivity === "SENSITIVE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -375,6 +443,7 @@ export class RiskEngine {
         if (
             action.actionType === "DELETE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -386,6 +455,7 @@ export class RiskEngine {
             action.actionType === "EXECUTE" &&
             action.executionMode === "REMOTE"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -397,6 +467,7 @@ export class RiskEngine {
             action.dataSensitivity === "SENSITIVE" &&
             action.duration === "CONTINUOUS"
         ) {
+
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
@@ -540,8 +611,11 @@ export class RiskEngine {
         ) {
 
             return {
+
                 valid: false,
-                reason: "INVALID_REQUIREMENTS"
+
+                reason:
+                    "INVALID_REQUIREMENTS"
             };
         }
 
@@ -571,6 +645,7 @@ export class RiskEngine {
             ) {
 
                 return {
+
                     valid: false,
 
                     reason:
@@ -586,6 +661,7 @@ export class RiskEngine {
         ) {
 
             return {
+
                 valid: false,
 
                 reason:
@@ -600,6 +676,7 @@ export class RiskEngine {
         ) {
 
             return {
+
                 valid: false,
 
                 reason:
@@ -614,6 +691,7 @@ export class RiskEngine {
         ) {
 
             return {
+
                 valid: false,
 
                 reason:
@@ -628,6 +706,7 @@ export class RiskEngine {
         ) {
 
             return {
+
                 valid: false,
 
                 reason:
@@ -637,8 +716,11 @@ export class RiskEngine {
 
 
         return {
+
             valid: true,
-            reason: "VALID_REQUIREMENTS"
+
+            reason:
+                "VALID_REQUIREMENTS"
         };
     }
 
@@ -665,6 +747,7 @@ export class RiskEngine {
                 lowerRequirements
             );
 
+
         const validationHigh =
             this.validateRequirementSet(
                 higherRequirements
@@ -677,8 +760,11 @@ export class RiskEngine {
         ) {
 
             return {
+
                 consistent: false,
-                reason: "INVALID_REQUIREMENT_SET"
+
+                reason:
+                    "INVALID_REQUIREMENT_SET"
             };
         }
 
@@ -708,6 +794,7 @@ export class RiskEngine {
                     lowerRequirements[field]
                 );
 
+
             const higher =
                 this.getRequirementLevel(
                     higherRequirements[field]
@@ -733,7 +820,8 @@ export class RiskEngine {
 
             consistent: true,
 
-            reason: "CONSISTENT"
+            reason:
+                "CONSISTENT"
         };
     }
 
@@ -745,9 +833,13 @@ export class RiskEngine {
     validateRequirementMonotonicity() {
 
         const levels = [
+
             "LOW",
+
             "MEDIUM",
+
             "HIGH",
+
             "CRITICAL"
         ];
 
@@ -791,9 +883,11 @@ export class RiskEngine {
             i++
         ) {
 
-            const lower = levels[i];
+            const lower =
+                levels[i];
 
-            const higher = levels[i + 1];
+            const higher =
+                levels[i + 1];
 
 
             const comparison =
@@ -803,7 +897,9 @@ export class RiskEngine {
                 );
 
 
-            if (!comparison.consistent) {
+            if (
+                !comparison.consistent
+            ) {
 
                 return {
 
@@ -870,8 +966,9 @@ export class RiskEngine {
 
             return "[" +
                 value
-                    .map(item =>
-                        this.stableStringify(item)
+                    .map(
+                        item =>
+                            this.stableStringify(item)
                     )
                     .join(",") +
                 "]";
@@ -881,12 +978,13 @@ export class RiskEngine {
         return "{" +
             Object.keys(value)
                 .sort()
-                .map(key =>
-                    JSON.stringify(key) +
-                    ":" +
-                    this.stableStringify(
-                        value[key]
-                    )
+                .map(
+                    key =>
+                        JSON.stringify(key) +
+                        ":" +
+                        this.stableStringify(
+                            value[key]
+                        )
                 )
                 .join(",") +
             "}";
@@ -930,12 +1028,14 @@ export class RiskEngine {
             hash ^=
                 input.charCodeAt(i);
 
+
             hash +=
                 (hash << 1) +
                 (hash << 4) +
                 (hash << 7) +
                 (hash << 8) +
                 (hash << 24);
+
 
             hash >>>= 0;
         }
@@ -1466,6 +1566,958 @@ export class RiskEngine {
 
 
     // =========================================================
+    // A4.8 — DECISION CONSISTENCY
+    // =========================================================
+
+    validateDecisionConsistency(decision) {
+
+        if (
+            !decision ||
+            typeof decision !== "object"
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_DECISION"
+            };
+        }
+
+
+        const requiredFields = [
+
+            "riskScore",
+
+            "baseRiskLevel",
+
+            "riskLevel",
+
+            "requirements",
+
+            "consistency"
+        ];
+
+
+        for (const field of requiredFields) {
+
+            if (
+                !Object.prototype.hasOwnProperty.call(
+                    decision,
+                    field
+                )
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        `MISSING_DECISION_FIELD_${field.toUpperCase()}`
+                };
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // Risk score validation
+        // -----------------------------------------------------
+
+        if (
+            decision.riskScore !== null &&
+            (
+                typeof decision.riskScore !== "number" ||
+                !Number.isFinite(
+                    decision.riskScore
+                ) ||
+                decision.riskScore < 0
+            )
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_RISK_SCORE"
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // Validate base risk level
+        // -----------------------------------------------------
+
+        if (
+            !Object.prototype.hasOwnProperty.call(
+                RiskEngine.LEVELS,
+                decision.baseRiskLevel
+            )
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_BASE_RISK_LEVEL"
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // Validate final risk level
+        // -----------------------------------------------------
+
+        if (
+            !Object.prototype.hasOwnProperty.call(
+                RiskEngine.LEVELS,
+                decision.riskLevel
+            )
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_RISK_LEVEL"
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // Risk level must never regress
+        // -----------------------------------------------------
+
+        if (
+            RiskEngine.LEVELS[
+                decision.riskLevel
+            ] <
+            RiskEngine.LEVELS[
+                decision.baseRiskLevel
+            ]
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "RISK_LEVEL_REGRESSION"
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // Validate requirements
+        // -----------------------------------------------------
+
+        const requirementValidation =
+            this.validateRequirementSet(
+                decision.requirements
+            );
+
+
+        if (
+            !requirementValidation.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_DECISION_REQUIREMENTS"
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // Validate expected requirements
+        // -----------------------------------------------------
+
+        if (decision.context) {
+
+            const expectedRequirements =
+                this.getRequirements(
+                    decision.riskLevel,
+                    decision.context
+                );
+
+
+            const requirementComparison =
+                this.compareRequirements(
+                    expectedRequirements,
+                    decision.requirements
+                );
+
+
+            if (
+                !requirementComparison.consistent
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "REQUIREMENT_REGRESSION",
+
+                    field:
+                        requirementComparison.field ||
+                        null
+                };
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // Validate consistency flag
+        // -----------------------------------------------------
+
+        if (
+            decision.consistency &&
+            decision.consistency.valid !== true
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "DECISION_CONSISTENCY_FLAG_INVALID"
+            };
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "DECISION_CONSISTENT"
+        };
+    }
+
+
+    // =========================================================
+    // A4.8 — REPEATED CONSISTENCY
+    // =========================================================
+
+    validateRepeatedConsistency(
+        action,
+        iterations = 10
+    ) {
+
+        if (
+            !Number.isInteger(iterations) ||
+            iterations < 2
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_ITERATION_COUNT"
+            };
+        }
+
+
+        const results = [];
+
+
+        for (
+            let i = 0;
+            i < iterations;
+            i++
+        ) {
+
+            const decision =
+                this.evaluate(action);
+
+
+            const consistency =
+                this.validateDecisionConsistency(
+                    decision
+                );
+
+
+            if (
+                !consistency.valid
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "DECISION_CONSISTENCY_FAILURE",
+
+                    iteration:
+                        i + 1,
+
+                    details:
+                        consistency
+                };
+            }
+
+
+            results.push(
+                decision
+            );
+        }
+
+
+        const baseline =
+            results[0];
+
+
+        for (
+            let i = 1;
+            i < results.length;
+            i++
+        ) {
+
+            const comparison =
+                this.compareDeterministicDecisions(
+                    baseline,
+                    results[i]
+                );
+
+
+            if (
+                !comparison.deterministic
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "REPEATED_DECISION_MISMATCH",
+
+                    iteration:
+                        i + 1
+                };
+            }
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "REPEATED_DECISION_CONSISTENT",
+
+            iterations
+        };
+    }
+
+
+    // =========================================================
+    // A4.8 — CROSS-DECISION CONSISTENCY
+    // =========================================================
+
+    validateCrossDecisionConsistency(
+        firstAction,
+        secondAction
+    ) {
+
+        const firstValidation =
+            this.validateAction(
+                firstAction
+            );
+
+
+        const secondValidation =
+            this.validateAction(
+                secondAction
+            );
+
+
+        if (
+            !firstValidation.valid ||
+            !secondValidation.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_COMPARISON_ACTION"
+            };
+        }
+
+
+        const firstDecision =
+            this.evaluate(
+                firstAction
+            );
+
+
+        const secondDecision =
+            this.evaluate(
+                secondAction
+            );
+
+
+        const firstSnapshot =
+            this.getDeterministicDecision(
+                firstDecision
+            );
+
+
+        const secondSnapshot =
+            this.getDeterministicDecision(
+                secondDecision
+            );
+
+
+        const firstContext =
+            firstSnapshot.context;
+
+
+        const secondContext =
+            secondSnapshot.context;
+
+
+        // Equivalent security contexts must
+        // produce equivalent security decisions.
+
+        if (
+            JSON.stringify(firstContext) ===
+            JSON.stringify(secondContext)
+        ) {
+
+            const comparison =
+                this.compareDeterministicDecisions(
+                    firstDecision,
+                    secondDecision
+                );
+
+
+            if (
+                !comparison.deterministic
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "EQUIVALENT_CONTEXT_DECISION_MISMATCH"
+                };
+            }
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "CROSS_DECISION_CONSISTENT"
+        };
+    }
+
+
+    // =========================================================
+    // A4.8 — INTEGRITY + CONSISTENCY
+    // =========================================================
+
+    validateIntegrityConsistency(
+        decision
+    ) {
+
+        const consistency =
+            this.validateDecisionConsistency(
+                decision
+            );
+
+
+        if (
+            !consistency.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "DECISION_CONSISTENCY_FAILURE",
+
+                details:
+                    consistency
+            };
+        }
+
+
+        const integrity =
+            this.verifyDecisionIntegrity(
+                decision
+            );
+
+
+        if (
+            !integrity.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "DECISION_INTEGRITY_FAILURE",
+
+                details:
+                    integrity
+            };
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "INTEGRITY_AND_CONSISTENCY_VALID"
+        };
+    }
+
+
+    // =========================================================
+    // A4.8 — DETERMINISTIC REPLAY
+    // =========================================================
+
+    validateDeterministicReplay(
+        action
+    ) {
+
+        const first =
+            this.evaluate(
+                action
+            );
+
+
+        const second =
+            this.evaluate(
+                action
+            );
+
+
+        const consistencyFirst =
+            this.validateDecisionConsistency(
+                first
+            );
+
+
+        const consistencySecond =
+            this.validateDecisionConsistency(
+                second
+            );
+
+
+        if (
+            !consistencyFirst.valid ||
+            !consistencySecond.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "REPLAY_CONSISTENCY_FAILURE"
+            };
+        }
+
+
+        const comparison =
+            this.compareDeterministicDecisions(
+                first,
+                second
+            );
+
+
+        if (
+            !comparison.deterministic
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "REPLAY_DETERMINISM_FAILURE"
+            };
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "DETERMINISTIC_REPLAY_VALID"
+        };
+    }
+
+
+    // =========================================================
+    // A4.8 — FAIL-CLOSED CONSISTENCY
+    // =========================================================
+
+    validateFailClosedConsistency() {
+
+        const invalidInputs = [
+
+            null,
+
+            undefined,
+
+            {},
+
+            {
+                actionType: "INVALID"
+            },
+
+            {
+                actionType: "READ",
+
+                executionMode: "INVALID",
+
+                duration: "SINGLE",
+
+                dataSensitivity: "PUBLIC",
+
+                externalEffect: "NONE",
+
+                reversibility: "REVERSIBLE",
+
+                userImpact: "LOW",
+
+                scope: "ONCE"
+            }
+        ];
+
+
+        for (
+            let i = 0;
+            i < invalidInputs.length;
+            i++
+        ) {
+
+            const decision =
+                this.evaluate(
+                    invalidInputs[i]
+                );
+
+
+            // Must deny.
+
+            if (
+                decision.allowed !== false
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "FAIL_CLOSED_BYPASS",
+
+                    case:
+                        i + 1
+                };
+            }
+
+
+            // Must be critical.
+
+            if (
+                decision.riskLevel !==
+                "CRITICAL"
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "FAIL_CLOSED_RISK_REGRESSION",
+
+                    case:
+                        i + 1
+                };
+            }
+
+
+            // Must remain internally consistent.
+
+            const consistency =
+                this.validateDecisionConsistency(
+                    decision
+                );
+
+
+            if (
+                !consistency.valid
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "FAIL_CLOSED_CONSISTENCY_FAILURE",
+
+                    case:
+                        i + 1
+                };
+            }
+
+
+            // Must retain integrity.
+
+            const integrity =
+                this.verifyDecisionIntegrity(
+                    decision
+                );
+
+
+            if (
+                !integrity.valid
+            ) {
+
+                return {
+
+                    valid: false,
+
+                    reason:
+                        "FAIL_CLOSED_INTEGRITY_FAILURE",
+
+                    case:
+                        i + 1
+                };
+            }
+        }
+
+
+        return {
+
+            valid: true,
+
+            reason:
+                "FAIL_CLOSED_CONSISTENCY_VALID",
+
+            cases:
+                invalidInputs.length
+        };
+    }
+
+
+    // =========================================================
+    // A4.8 — COMPLETE VERIFICATION
+    // =========================================================
+
+    validateA48(action) {
+
+        if (
+            !action ||
+            typeof action !== "object"
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "INVALID_A48_ACTION"
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // 1. Decision consistency
+        // -----------------------------------------------------
+
+        const decision =
+            this.evaluate(
+                action
+            );
+
+
+        const decisionConsistency =
+            this.validateDecisionConsistency(
+                decision
+            );
+
+
+        if (
+            !decisionConsistency.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                stage:
+                    "DECISION_CONSISTENCY",
+
+                details:
+                    decisionConsistency
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // 2. Integrity + consistency
+        // -----------------------------------------------------
+
+        const integrityConsistency =
+            this.validateIntegrityConsistency(
+                decision
+            );
+
+
+        if (
+            !integrityConsistency.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                stage:
+                    "INTEGRITY_CONSISTENCY",
+
+                details:
+                    integrityConsistency
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // 3. Repeated consistency
+        // -----------------------------------------------------
+
+        const repeatedConsistency =
+            this.validateRepeatedConsistency(
+                action,
+                10
+            );
+
+
+        if (
+            !repeatedConsistency.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                stage:
+                    "REPEATED_CONSISTENCY",
+
+                details:
+                    repeatedConsistency
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // 4. Deterministic replay
+        // -----------------------------------------------------
+
+        const replay =
+            this.validateDeterministicReplay(
+                action
+            );
+
+
+        if (
+            !replay.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                stage:
+                    "DETERMINISTIC_REPLAY",
+
+                details:
+                    replay
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // 5. Fail-closed consistency
+        // -----------------------------------------------------
+
+        const failClosed =
+            this.validateFailClosedConsistency();
+
+
+        if (
+            !failClosed.valid
+        ) {
+
+            return {
+
+                valid: false,
+
+                stage:
+                    "FAIL_CLOSED_CONSISTENCY",
+
+                details:
+                    failClosed
+            };
+        }
+
+
+        // -----------------------------------------------------
+        // A4.8 PASS
+        // -----------------------------------------------------
+
+        return {
+
+            valid: true,
+
+            reason:
+                "A4.8_RISK_CONSISTENCY_AND_DETERMINISM_VALID",
+
+            tests: {
+
+                decisionConsistency:
+                    true,
+
+                integrityConsistency:
+                    true,
+
+                repeatedConsistency:
+                    true,
+
+                deterministicReplay:
+                    true,
+
+                failClosedConsistency:
+                    true
+            },
+
+            engineVersion:
+                this.version
+        };
+    }
+
+
+    // =========================================================
     // MAIN EVALUATION
     // =========================================================
 
@@ -1485,21 +2537,29 @@ export class RiskEngine {
 
             const criticalAction = {
 
-                actionType: "EXECUTE",
+                actionType:
+                    "EXECUTE",
 
-                executionMode: "REMOTE",
+                executionMode:
+                    "REMOTE",
 
-                duration: "SINGLE",
+                duration:
+                    "SINGLE",
 
-                dataSensitivity: "SENSITIVE",
+                dataSensitivity:
+                    "SENSITIVE",
 
-                externalEffect: "NETWORK",
+                externalEffect:
+                    "NETWORK",
 
-                reversibility: "IRREVERSIBLE",
+                reversibility:
+                    "IRREVERSIBLE",
 
-                userImpact: "HIGH",
+                userImpact:
+                    "HIGH",
 
-                scope: "PERSISTENT"
+                scope:
+                    "PERSISTENT"
             };
 
 
@@ -1512,17 +2572,21 @@ export class RiskEngine {
 
             return this.attachDecisionIntegrity({
 
-                allowed: false,
+                allowed:
+                    false,
 
                 action:
                     action?.name ||
                     "UNKNOWN_ACTION",
 
-                riskScore: null,
+                riskScore:
+                    null,
 
-                baseRiskLevel: "CRITICAL",
+                baseRiskLevel:
+                    "CRITICAL",
 
-                riskLevel: "CRITICAL",
+                riskLevel:
+                    "CRITICAL",
 
                 reason:
                     validation.reason,
@@ -1535,7 +2599,8 @@ export class RiskEngine {
                 consistency:
                     Object.freeze({
 
-                        valid: true,
+                        valid:
+                            true,
 
                         reason:
                             "FAIL_CLOSED_CRITICAL"
@@ -1602,7 +2667,8 @@ export class RiskEngine {
 
             return this.attachDecisionIntegrity({
 
-                allowed: false,
+                allowed:
+                    false,
 
                 action:
                     action.name ||
@@ -1634,7 +2700,8 @@ export class RiskEngine {
                 consistency:
                     Object.freeze({
 
-                        valid: false,
+                        valid:
+                            false,
 
                         reason:
                             requirementValidation.reason
@@ -1655,7 +2722,8 @@ export class RiskEngine {
 
         return this.attachDecisionIntegrity({
 
-            allowed: true,
+            allowed:
+                true,
 
             action:
                 action.name ||
@@ -1687,7 +2755,8 @@ export class RiskEngine {
             consistency:
                 Object.freeze({
 
-                    valid: true,
+                    valid:
+                        true,
 
                     reason:
                         "SECURITY_REQUIREMENTS_CONSISTENT"
