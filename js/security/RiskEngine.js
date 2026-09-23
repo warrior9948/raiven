@@ -1,7 +1,11 @@
-// RAIVEN Risk Engine v0.7
+// RAIVEN Risk Engine v0.7.1
 // Stage A4.7
 //
-// Risk Decision Determinism
+// A4.3 Risk Context
+// A4.4 Security Requirements
+// A4.5 Risk Decision Consistency
+// A4.6 Risk Decision Integrity
+// A4.7 Risk Decision Determinism
 //
 // IMPORTANT:
 // RiskEngine NEVER grants permission.
@@ -15,9 +19,10 @@
 export class RiskEngine {
 
     constructor() {
-        this.version = "0.7";
+        this.version = "0.7.1";
         this._decisionCounter = 0;
     }
+
 
     static LEVELS = Object.freeze({
         LOW: 1,
@@ -25,6 +30,7 @@ export class RiskEngine {
         HIGH: 3,
         CRITICAL: 4
     });
+
 
     static VALUES = Object.freeze({
 
@@ -84,13 +90,17 @@ export class RiskEngine {
 
     validateAction(action) {
 
-        if (!action || typeof action !== "object") {
-
+        if (
+            !action ||
+            typeof action !== "object" ||
+            Array.isArray(action)
+        ) {
             return {
                 valid: false,
                 reason: "INVALID_ACTION"
             };
         }
+
 
         const requiredFields = [
             "dataSensitivity",
@@ -103,6 +113,7 @@ export class RiskEngine {
             "duration"
         ];
 
+
         for (const field of requiredFields) {
 
             const value = action[field];
@@ -111,7 +122,6 @@ export class RiskEngine {
                 !RiskEngine.VALUES[field] ||
                 !RiskEngine.VALUES[field].includes(value)
             ) {
-
                 return {
                     valid: false,
                     reason:
@@ -119,6 +129,7 @@ export class RiskEngine {
                 };
             }
         }
+
 
         return {
             valid: true,
@@ -164,6 +175,7 @@ export class RiskEngine {
 
         let score = 0;
 
+
         if (
             action.permission &&
             action.permission !== "NONE"
@@ -171,11 +183,13 @@ export class RiskEngine {
             score += 1;
         }
 
+
         if (
             action.dataSensitivity === "PRIVATE"
         ) {
             score += 1;
         }
+
 
         if (
             action.dataSensitivity === "SENSITIVE"
@@ -183,11 +197,13 @@ export class RiskEngine {
             score += 2;
         }
 
+
         if (
             action.externalEffect === "DEVICE"
         ) {
             score += 1;
         }
+
 
         if (
             action.externalEffect === "NETWORK"
@@ -195,11 +211,13 @@ export class RiskEngine {
             score += 2;
         }
 
+
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
             score += 2;
         }
+
 
         if (
             action.userImpact === "MEDIUM"
@@ -207,11 +225,13 @@ export class RiskEngine {
             score += 1;
         }
 
+
         if (
             action.userImpact === "HIGH"
         ) {
             score += 2;
         }
+
 
         if (
             action.scope === "SESSION"
@@ -219,11 +239,13 @@ export class RiskEngine {
             score += 1;
         }
 
+
         if (
             action.scope === "PERSISTENT"
         ) {
             score += 2;
         }
+
 
         if (
             action.actionType === "WRITE"
@@ -231,11 +253,13 @@ export class RiskEngine {
             score += 1;
         }
 
+
         if (
             action.actionType === "CAPTURE"
         ) {
             score += 1;
         }
+
 
         if (
             action.actionType === "TRANSMIT"
@@ -243,11 +267,13 @@ export class RiskEngine {
             score += 2;
         }
 
+
         if (
             action.actionType === "DELETE"
         ) {
             score += 2;
         }
+
 
         if (
             action.actionType === "EXECUTE"
@@ -255,17 +281,20 @@ export class RiskEngine {
             score += 2;
         }
 
+
         if (
             action.executionMode === "REMOTE"
         ) {
             score += 1;
         }
 
+
         if (
             action.duration === "CONTINUOUS"
         ) {
             score += 1;
         }
+
 
         return score;
     }
@@ -299,80 +328,81 @@ export class RiskEngine {
         let level =
             RiskEngine.LEVELS[currentLevel];
 
+
         if (
             action.dataSensitivity === "SENSITIVE" &&
             action.externalEffect === "NETWORK"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
             );
         }
+
 
         if (
             action.reversibility === "IRREVERSIBLE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
             );
         }
+
 
         if (
             action.reversibility === "IRREVERSIBLE" &&
             action.userImpact === "HIGH"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.CRITICAL
             );
         }
 
+
         if (
             action.scope === "PERSISTENT" &&
             action.dataSensitivity === "SENSITIVE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
             );
         }
+
 
         if (
             action.actionType === "DELETE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
             );
         }
+
 
         if (
             action.actionType === "EXECUTE" &&
             action.executionMode === "REMOTE"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
             );
         }
+
 
         if (
             action.dataSensitivity === "SENSITIVE" &&
             action.duration === "CONTINUOUS"
         ) {
-
             level = Math.max(
                 level,
                 RiskEngine.LEVELS.HIGH
             );
         }
+
 
         return Object.keys(
             RiskEngine.LEVELS
@@ -515,6 +545,7 @@ export class RiskEngine {
             };
         }
 
+
         const fields = [
 
             "requiresConfirmation",
@@ -647,9 +678,7 @@ export class RiskEngine {
 
             return {
                 consistent: false,
-
-                reason:
-                    "INVALID_REQUIREMENT_SET"
+                reason: "INVALID_REQUIREMENT_SET"
             };
         }
 
@@ -716,15 +745,12 @@ export class RiskEngine {
     validateRequirementMonotonicity() {
 
         const levels = [
-
             "LOW",
-
             "MEDIUM",
-
             "HIGH",
-
             "CRITICAL"
         ];
+
 
         const profiles = {};
 
@@ -818,6 +844,7 @@ export class RiskEngine {
 
         this._decisionCounter++;
 
+
         return (
             `DECISION-${Date.now()}-${this._decisionCounter}`
         );
@@ -855,7 +882,6 @@ export class RiskEngine {
             Object.keys(value)
                 .sort()
                 .map(key =>
-
                     JSON.stringify(key) +
                     ":" +
                     this.stableStringify(
@@ -892,9 +918,6 @@ export class RiskEngine {
             this.stableStringify(copy);
 
 
-        // Application-level FNV-1a style fingerprint.
-        // This is NOT a cryptographic trust anchor.
-
         let hash = 2166136261;
 
 
@@ -929,6 +952,17 @@ export class RiskEngine {
     // =========================================================
 
     attachDecisionIntegrity(decision) {
+
+        if (
+            !decision ||
+            typeof decision !== "object"
+        ) {
+
+            throw new TypeError(
+                "Cannot attach integrity to invalid decision."
+            );
+        }
+
 
         const decisionId =
             this.createDecisionId();
@@ -986,7 +1020,10 @@ export class RiskEngine {
         }
 
 
-        if (!decision.decisionId) {
+        if (
+            typeof decision.decisionId !== "string" ||
+            decision.decisionId.length === 0
+        ) {
 
             return {
 
@@ -1000,7 +1037,7 @@ export class RiskEngine {
 
         if (
             !decision.integrity ||
-            !decision.integrity.fingerprint
+            typeof decision.integrity !== "object"
         ) {
 
             return {
@@ -1009,6 +1046,21 @@ export class RiskEngine {
 
                 reason:
                     "MISSING_DECISION_INTEGRITY"
+            };
+        }
+
+
+        if (
+            typeof decision.integrity.fingerprint !== "string" ||
+            decision.integrity.fingerprint.length === 0
+        ) {
+
+            return {
+
+                valid: false,
+
+                reason:
+                    "MISSING_DECISION_FINGERPRINT"
             };
         }
 
@@ -1029,7 +1081,12 @@ export class RiskEngine {
                 valid: false,
 
                 reason:
-                    "DECISION_TAMPER_DETECTED"
+                    "DECISION_TAMPER_DETECTED",
+
+                expectedFingerprint,
+
+                fingerprint:
+                    decision.integrity.fingerprint
             };
         }
 
@@ -1039,7 +1096,13 @@ export class RiskEngine {
             valid: true,
 
             reason:
-                "DECISION_INTEGRITY_VALID"
+                "DECISION_INTEGRITY_VALID",
+
+            decisionId:
+                decision.decisionId,
+
+            fingerprint:
+                decision.integrity.fingerprint
         };
     }
 
@@ -1081,13 +1144,16 @@ export class RiskEngine {
             trusted: true,
 
             reason:
-                "DECISION_INTEGRITY_VALID"
+                "DECISION_INTEGRITY_VALID",
+
+            integrity:
+                verification
         };
     }
 
 
     // =========================================================
-    // A4.7 — DETERMINISTIC DECISION SNAPSHOT
+    // A4.7 — DETERMINISTIC SNAPSHOT
     // =========================================================
 
     getDeterministicDecision(result) {
@@ -1106,22 +1172,17 @@ export class RiskEngine {
             allowed:
                 result.allowed ?? false,
 
-
             riskScore:
                 result.riskScore ?? null,
-
 
             baseRiskLevel:
                 result.baseRiskLevel ?? null,
 
-
             riskLevel:
                 result.riskLevel ?? null,
 
-
             reason:
                 result.reason ?? null,
-
 
             context:
                 result.context
@@ -1147,41 +1208,32 @@ export class RiskEngine {
                     }
                     : null,
 
-
             requirements:
                 result.requirements
                     ? {
 
                         requiresConfirmation:
-                            result.requirements
-                                .requiresConfirmation,
+                            result.requirements.requiresConfirmation,
 
                         requiresExplicitConfirmation:
-                            result.requirements
-                                .requiresExplicitConfirmation,
+                            result.requirements.requiresExplicitConfirmation,
 
                         requiresAdditionalAuthentication:
-                            result.requirements
-                                .requiresAdditionalAuthentication,
+                            result.requirements.requiresAdditionalAuthentication,
 
                         requiresAuditLog:
-                            result.requirements
-                                .requiresAuditLog,
+                            result.requirements.requiresAuditLog,
 
                         requiresIsolation:
-                            result.requirements
-                                .requiresIsolation,
+                            result.requirements.requiresIsolation,
 
                         requiresPreExecutionReview:
-                            result.requirements
-                                .requiresPreExecutionReview,
+                            result.requirements.requiresPreExecutionReview,
 
                         requiresEmergencyProtection:
-                            result.requirements
-                                .requiresEmergencyProtection
+                            result.requirements.requiresEmergencyProtection
                     }
                     : null,
-
 
             consistency:
                 result.consistency
@@ -1414,7 +1466,7 @@ export class RiskEngine {
 
 
     // =========================================================
-    // A4.7 — MAIN EVALUATION
+    // MAIN EVALUATION
     // =========================================================
 
     evaluate(action) {
